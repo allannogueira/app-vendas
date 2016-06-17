@@ -122,7 +122,7 @@
           data    : $scope.produto, //forms user object
           headers : {'Content-Type': 'application/x-www-form-urlencoded'} 
         }).then(function mySucces(response) {                    
-            if(response.data){
+            if(response.data == 1){
               $scope.showAlert($event,"Salvo com sucesso!");
               codProduto = response.data;
               //envia as imagens para o cadastro de produtos
@@ -136,7 +136,7 @@
               });
               
             }else{
-              $scope.showAlert($event,"Desculpe, não foi possível salvar!");
+              $scope.showAlert($event,response.data);
             }          
         }, 
         function myError(response) {

@@ -52,6 +52,22 @@ class ProdutosImagens{
 
         return $this;
     }
+
+    public function salvar($conexao){
+        $sql = "INSERT INTO ddc_app_vendas.produto_imagens (
+                    imagem
+                    ,produto_id
+
+                )
+                VALUES(
+                    '".$this->getImagem()."'
+                    ,'".$this->getProduto()."'
+                )
+        ";      
+        
+        $result = mysqli_query($conexao,$sql);
+        return $result;
+    }
 }
 
 ?>

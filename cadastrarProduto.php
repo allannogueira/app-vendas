@@ -10,8 +10,22 @@
   if(isset($_GET['codProduto'])){
     require_once("class/ProdutosImagens.php");
     $imagens = new ProdutosImagens();
-    echo var_dump($_FILES);
+    $imagens->setProduto($_GET['codProduto']);
 
+    $path = $_FILES['files']['tmp_name'];
+    $name = $_FILES['files']['name'];
+    $size = sizeof($path);
+
+    for($i = 0;$i < $tam; $i++);
+    {            
+      $type = pathinfo($name[$i], PATHINFO_EXTENSION);
+      $getContents = file_get_contents($path[$i]);
+      echo $type;
+      $imgBase64 = 'data:image/' . $type . ';base64, ' . base64_encode($getContents);   
+
+      $imagens->setImagem($imgBase64);
+      echo $imagens->salvar($conexao->connect());      
+    }
   }else{//cadastra ou altera o produto    
     $_POST = json_decode($_POST,true);
 

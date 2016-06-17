@@ -24,7 +24,7 @@ class Produto{
      *
      * @return self
      */
-    private function setId($id)
+    public function setId($id)
     {
         $this->id = $id;
 
@@ -129,6 +129,9 @@ class Produto{
     }
 
     public function salvar($conexao){
+        if($this->getCod() == "")
+            return "Por favor, preencha o código do produto.";
+
         $sql = "INSERT INTO ddc_app_vendas.produto (
                     cod
                     ,nome
@@ -151,6 +154,16 @@ class Produto{
         }
 
         return $result;
+    }
+
+    public function listar($conexao){
+        $sql = "SELECT * FROM ddc_app_vendas.produto";
+        $result = mysqli_query($conexao,$sql);
+        $row = mysqli_fetch_array($result);
+        while($row){
+            echo $row["nome"];    
+        }        
+        //echo = $row["preco_custo"]);
     }
 }
 
