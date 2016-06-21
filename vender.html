@@ -1,0 +1,164 @@
+<html lang="en" >
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Angular Material style sheet -->
+  <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+</head>
+<body ng-app="myApp">
+  <div layout="column" ng-cloak style="height: 100%" ng-controller="AppCtrl">
+    <md-toolbar class="md-hue-2">
+      <div class="md-toolbar-tools">
+        <md-button class="md-icon-button" aria-label="More" ng-click="toggleLeft()" >
+          <md-icon md-svg-icon="img/icons/more_vert.svg"></md-icon>
+        </md-button>
+        <h2>
+          <span>APP VENDAS</span>
+        </h2>
+        <span flex></span>
+      </div>
+    </md-toolbar>
+    <section layout="row" flex> 
+      <div layout="column" style="height:100%;" ng-cloak>
+        <section layout="row" flex>
+          <md-sidenav 
+          class="md-sidenav-left"
+          md-component-id="left"
+          md-is-locked-open="$mdMedia('gt-md')"
+          md-disable-backdrop
+          md-whiteframe="4"
+          style="top: 50px">
+          <md-toolbar class="md-theme-indigo">
+            <h1 class="md-toolbar-tools">Menu</h1>
+          </md-toolbar>    
+          <div class="mdl-layout__drawer" ng-include="'menu.html'"></div>
+        </md-sidenav>   
+      </section>
+    </div>
+    <md-content flex layout-padding>   
+      <form action="#"  novalidate>
+        <md-input-container class="md-block" flex-gt-sm="">
+          <md-icon class="material-icons">&#xE7FD;</md-icon>
+          <label>Cliente</label>
+          <md-select placeholder="Cliente" ng-model="venda.cliente" ng-required="true" md-on-open="carregarClientes()" style="min-width: 200px;">
+            <md-option ng-value="cliente.id" ng-repeat="cliente in clientes"> &nbsp; {{cliente.nome}}</md-option>
+          </md-select>
+        </md-input-container>        
+        <md-input-container class="md-block" flex-gt-sm="">
+          <md-icon class="material-icons">list</md-icon>
+          <label>Produto</label>
+          <md-select placeholder="Produto" ng-model="venda.produto" ng-required="true" multiple="true" md-on-open="carregarProdutos()" style="min-width: 200px;">
+            <md-option ng-value="produto" ng-repeat="produto in produtos">
+                <img style="max-height: 50px;" src="{{produto.imagem}}" /> - {{produto.nome}} - {{produto.precoVenda | currency}}
+            </md-option>
+          </md-select>
+        </md-input-container>
+        <br/>
+        <!-- Colored raised button -->
+        {{venda}}
+        <md-button class="md-primary md-raised" ng-click="vender($event)">
+          Realizar Venda
+        </md-button>
+      </form>
+    </md-content>
+  </section>
+</div>
+
+<!-- Angular Material requires Angular.js Libraries -->
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
+<!-- Angular Material Library -->
+<script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
+
+<script type="text/javascript">
+  angular.module('myApp', ['ngMaterial'])
+
+  .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log) {
+    
+    $scope.toggleLeft = buildDelayedToggler('left');
+    
+    $scope.showAlert = function(ev,message,title = "Alerta") {
+        // Appending dialog to document.body to cover sidenav in docs app
+        // Modal dialogs should fully cover application
+        // to prevent interaction outside of dialog
+        $mdDialog.show(
+          $mdDialog.alert()
+          .parent(angular.element(document.querySelector('#popupContainer')))
+          .clickOutsideToClose(true)
+          .title(title)
+          .textContent(message)
+          .ariaLabel('Alert Dialog Demo')
+          .ok('OK')
+          .targetEvent(ev)
+          );
+      }
+
+      $scope.vender = function($event) {
+        $http({
+          method : "POST",
+          url : "vender.php",
+          data    : $scope.venda, //forms user object
+          headers : {'Content-Type': 'application/x-www-form-urlencoded'} 
+        }).then(function mySucces(response) {
+
+          if(response.data){
+            $scope.showAlert($event,"Salvo com sucesso!");
+          }else{
+            $scope.showAlert($event,"Desculpe, não foi possível salvar!");
+          }          
+        }, 
+        function myError(response) {
+          console.log(response.statusText);
+        });
+      };
+
+      $scope.carregarClientes = function(){
+        $scope.clientes || $http.get("consultarCliente.php").then(function(response) {
+          $scope.clientes = response.data;
+        });
+      }
+
+      $scope.carregarProdutos = function(){
+        $scope.produtos || $http.get("consultarProduto.php").then(function(response) {
+          $scope.produtos = response.data;
+        });
+      }
+
+     
+      /**
+      * Supplies a function that will continue to operate until the
+      * time is up.
+      */
+      function debounce(func, wait, context) {
+        var timer;
+        return function debounced() {
+          var context = $scope,
+          args = Array.prototype.slice.call(arguments);
+          $timeout.cancel(timer);
+          timer = $timeout(function() {
+            timer = undefined;
+            func.apply(context, args);
+          }, wait || 10);
+        };
+      }
+      /**
+      * Build handler to open/close a SideNav; when animation finishes
+      * report completion in console
+      */
+      function buildDelayedToggler(navID) {
+        return debounce(function() {
+          // Component lookup should always be available since we are not using `ng-if`
+          $mdSidenav(navID)
+          .toggle()
+          .then(function () {
+            $log.debug("toggle " + navID + " is done");
+          });
+        }, 200);
+      }  
+    })  
+  </script>
+</body>  
+</html>

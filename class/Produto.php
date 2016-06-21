@@ -156,15 +156,7 @@ class Produto{
         return $result;
     }
 
-    public function listar($conexao){
-        $sql = "SELECT * FROM ddc_app_vendas.produto";
-        $result = mysqli_query($conexao,$sql);
-        $row = mysqli_fetch_array($result);
-        while($row){
-            echo $row["nome"];    
-        }        
-        //echo = $row["preco_custo"]);
-    }
+   
 }
 
 ?>
