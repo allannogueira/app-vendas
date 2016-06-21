@@ -8,6 +8,6 @@
   $conexao = new Conexao();  
   
   $produto = new Produto();
-  $produto->listar($conexao->connect());  
+  echo $produto->listar($conexao->connect());  
     
 ?>

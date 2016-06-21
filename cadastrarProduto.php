@@ -14,13 +14,13 @@
 
     $path = $_FILES['files']['tmp_name'];
     $name = $_FILES['files']['name'];
-    $size = sizeof($path);
+    $tam = sizeof($path);
 
     for($i = 0;$i < $tam; $i++);
-    {            
+    {        
       $type = pathinfo($name[$i], PATHINFO_EXTENSION);
       $getContents = file_get_contents($path[$i]);
-      echo $type;
+ 
       $imgBase64 = 'data:image/' . $type . ';base64, ' . base64_encode($getContents);   
 
       $imagens->setImagem($imgBase64);
@@ -34,6 +34,7 @@
     $produto->setNome($_POST['nome']);
     $produto->setPrecoCusto($_POST['precoCusto']);
     $produto->setPrecoVenda($_POST['precoVenda']);
+    $produto->setEstoque($_POST['estoque']);
     echo $produto->salvar($conexao->connect());   
   }
     

@@ -66,7 +66,6 @@ class ProdutosImagens{
         ";      
         
         $result = mysqli_query($conexao,$sql);
-        return $result;
     }
 }
 

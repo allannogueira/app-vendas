@@ -121,8 +121,9 @@
           url : "cadastrarProduto.php",
           data    : $scope.produto, //forms user object
           headers : {'Content-Type': 'application/x-www-form-urlencoded'} 
-        }).then(function mySucces(response) {                    
-            if(response.data == 1){
+        }).then(function mySucces(response) {  
+        
+            if(response.data){
               $scope.showAlert($event,"Salvo com sucesso!");
               codProduto = response.data;
               //envia as imagens para o cadastro de produtos

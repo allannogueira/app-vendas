@@ -1,4 +1,5 @@
 <?php
+
 class Conexao{
 	private $host;
 	private $user;
@@ -9,7 +10,7 @@ class Conexao{
 		$this->host = "192.185.176.178";
 		$this->user = "ddc_allan2";
 		$this->pass = "Aa@123456";
-		$this->database = "ddc_app_vendas";		
+		$this->database = "ddc_app_vendas";	
 	}
 
 	public function connect(){
@@ -21,6 +22,7 @@ class Conexao{
 		);		
 		return $conexao;
 	}
+
 }
 
 ?>

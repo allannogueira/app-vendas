@@ -6,7 +6,8 @@ class Produto{
     private $nome;
     private $precoCusto;
     private $precoVenda;
-	
+    private $estoque;
+    
     /**
      * Gets the value of id.
      *
@@ -128,6 +129,30 @@ class Produto{
         return $this;
     }
 
+    /**
+     * Gets the value of estoque.
+     *
+     * @return mixed
+     */
+    public function getEstoque()
+    {
+        return $this->estoque;
+    }
+
+    /**
+     * Sets the value of id.
+     *
+     * @param mixed $id the id
+     *
+     * @return self
+     */
+    public function setEstoque($estoque)
+    {
+        $this->estoque = $estoque;
+
+        return $this;
+    }
+
     public function salvar($conexao){
         if($this->getCod() == "")
             return "Por favor, preencha o código do produto.";
@@ -136,13 +161,15 @@ class Produto{
                     cod
                     ,nome
                     ,preco_custo
-                    ,preco_venda                    
+                    ,preco_venda
+                    ,estoque       
                 )
                 VALUES(
                     '".$this->getCod()."'
                     ,'".$this->getNome()."'
                     ,'".$this->getPrecoCusto()."'
-                    ,'".$this->getPrecoVenda()."'                    
+                    ,'".$this->getPrecoVenda()."'
+                    ,'".$this->getEstoque()."'
                 )
         ";      
         $result = mysqli_query($conexao,$sql);
@@ -157,12 +184,26 @@ class Produto{
     }
 
     public function listar($conexao){
-        $sql = "SELECT * FROM ddc_app_vendas.produto";
+        $retorno = "";
+        $sql = "SELECT 
+                    P.*,
+                    PI.imagem
+                FROM 
+                    ddc_app_vendas.produto_imagens PI 
+                    INNER JOIN ddc_app_vendas.produto P on P.id = PI.produto_id";
         $result = mysqli_query($conexao,$sql);
-        $row = mysqli_fetch_array($result);
-        while($row){
-            echo $row["nome"];    
-        }        
+        
+        while($row = mysqli_fetch_array($result)){
+            $imagem = $row["imagem"];
+            $cod = $row["cod"];
+            $nome = $row["nome"];
+            $precoCusto = $row["preco_custo"];
+            $precoVenda = $row["preco_venda"];
+            $estoque = $row["estoque"];
+            $retorno[] = array("imagem"=>$imagem, "cod"=>$cod, "nome"=>$nome, "precoCusto"=>$precoCusto, "precoVenda"=>$precoVenda, "estoque"=>$estoque);
+        }
+
+        return json_encode($retorno) ;
         //echo = $row["preco_custo"]);
     }
 }
