@@ -4,7 +4,12 @@
   <!-- Angular Material style sheet -->
   <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  
+  <style>
+    md-list.md-dense md-list-item.md-3-line, md-list.md-dense md-list-item.md-3-line>._md-no-style {
+      min-height: 85px;
+      height: 85px;
+    }
+  </style>
 </head>
 <body ng-app="myApp">
   <div layout="column" ng-cloak style="height: 100%" ng-controller="AppCtrl">
@@ -19,81 +24,101 @@
         <span flex></span>
       </div>
     </md-toolbar>
-    <section layout="row" flex> 
-      <div layout="column" style="height:100%;" ng-cloak>
-        <section layout="row" flex>
-          <md-sidenav 
-          class="md-sidenav-left"
-          md-component-id="left"
-          md-is-locked-open="$mdMedia('gt-md')"
-          md-disable-backdrop
-          md-whiteframe="4"
-          style="top: 50px">
-          <md-toolbar class="md-theme-indigo">
-            <h1 class="md-toolbar-tools">Menu</h1>
-          </md-toolbar>    
-          <div class="mdl-layout__drawer" ng-include="'menu.html'"></div>
-        </md-sidenav>   
-      </section>
-    </div>
-    <md-content flex layout-padding>   
-      <form action="#"  novalidate>
-        <md-input-container class="md-block" flex-gt-sm="">
-          <md-icon class="material-icons">&#xE7FD;</md-icon>
-          <label>Cliente</label>
-          <md-select placeholder="Cliente" ng-model="venda.cliente" ng-required="true" md-on-open="carregarClientes()" style="min-width: 200px;">
-            <md-option ng-value="cliente.id" ng-repeat="cliente in clientes"> &nbsp; {{cliente.nome}}</md-option>
-          </md-select>
-        </md-input-container>        
-        
 
-          <div layout="row" layout-wrap layout-align="center start">
-              <md-input-container class="md-block" flex-gt-sm="">
-                <md-select  placeholder="Produto" ng-model="venda.produto" ng-required="true" md-on-open="carregarProdutos()" style="min-width: 200px;">
+    <section layout="row" flex>       
+
+      <div layout="column"  ng-cloak>
+        <section layout="row" flex>
+          <md-sidenav class="md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" md-disable-backdrop md-whiteframe="4" style="top: 50px">
+     
+            <div class="mdl-layout__drawer" ng-include="'menu.html'"></div>
+          </md-sidenav>   
+        </section>
+      </div>
+
+
+      <div layout="column" flex="100">
+        <md-content flex layout-padding>   
+          <form action="#"  novalidate>
+            <md-input-container class="md-block" flex-gt-sm="100">
+              <md-icon class="material-icons">&#xE7FD;</md-icon>
+              <label>Cliente</label>
+              <md-select placeholder="Cliente" ng-model="venda.cliente" ng-required="true" md-on-open="carregarClientes()" style="min-width: 200px;">
+                <md-option ng-value="cliente.id" ng-repeat="cliente in clientes"> &nbsp; {{cliente.nome}}</md-option>
+              </md-select>
+            </md-input-container>        
+
+
+            <div layout-wrap  layout="row" flex>
+              <md-input-container layout="column" flex="70">
+                <md-icon class="material-icons">add_shopping_cart</md-icon>
+                <md-select  placeholder="Produto" ng-model="venda.produto" ng-required="true" md-on-open="carregarProdutos()">
                   <md-option ng-value="produto" ng-repeat="produto in produtos">
-                      <img style="max-height: 20px;" src="{{produto.imagem}}" /> - {{produto.nome}} - {{produto.precoVenda | currency}}
+                    <img style="max-height: 20px;" src="{{produto.imagem}}" /> {{produto.nome}} - {{produto.tamanho}} - {{produto.precoVenda | currency}}
                   </md-option>
                 </md-select>
               </md-input-container>
 
-              
-              <md-input-container>
-                <label>QTD</label>
-                <input type="number"  ng-model="venda.produto.qtd">
-              </md-input-container>
-              
-              <md-button class="md-fab md-mini md-primary" ng-click="adicionarProdutos()" >+</md-button>
-              
-          </div>  
+             
+                <md-input-container flex="20">
+                  <label>QTD</label>
+                  <input type="number"  ng-model="venda.produto.qtd">
+                </md-input-container>
 
-          {{produtosVenda}}
-        <br/>
-        <!-- Colored raised button -->
-        {{venda}}
-        <md-button class="md-primary md-raised" ng-click="vender($event)">
-          Realizar Venda
-        </md-button>
-      </form>
-    </md-content>
-  </section>
-</div>
+                <div  flex="10">
+                  <md-button class="md-fab md-mini md-primary"  ng-click="adicionarProdutos()" >+</md-button>
+                </div>
+             
+            </div>  
+            <br/>
+            <!-- Colored raised button -->            
 
-<!-- Angular Material requires Angular.js Libraries -->
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
-<!-- Angular Material Library -->
-<script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
 
-<script type="text/javascript">
-  angular.module('myApp', ['ngMaterial'])
+            <md-list class="md-dense" flex="">
+              <md-subheader class="md-no-sticky">Itens selecionados</md-subheader>
+              <md-list-item class="md-3-line" ng-repeat="item in produtosVenda track by $index" ng-click="null">
+                <img ng-src="{{item.imagem}}" class="md-avatar" alt="{{item.nome}}" />
+                <div class="md-list-item-text" layout="column" flex="33">
+                  <h3>{{item.qtd}}x - {{ item.nome }} - {{item.cod}}</h3>
+                  <h4>{{ item.tamanho }}</h4>
+                  <p>{{ item.precoVenda | currency }}</p>
+                </div>
+              </md-list-item>
+            </md-list>
+            <md-list class="md-dense" flex="">
+              <md-subheader class="md-no-sticky">Valor Total: <strong>{{venda.valorTotal | currency}}</strong></md-subheader>             
+            </md-list>
 
-  .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log) {
-    
-    $scope.toggleLeft = buildDelayedToggler('left');
-    $scope.produtosVenda = [];
-    $scope.showAlert = function(ev,message,title = "Alerta") {
+
+
+            <md-button class="md-primary md-raised" ng-click="vender($event)">
+              Realizar Venda
+            </md-button>
+          </form>
+        </md-content>
+
+      </div>
+    </section>
+  </div>
+
+  <!-- Angular Material requires Angular.js Libraries -->
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
+  <!-- Angular Material Library -->
+  <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
+
+  <script type="text/javascript">
+    angular.module('myApp', ['ngMaterial'])
+
+    .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log) {
+
+      $scope.toggleLeft = buildDelayedToggler('left');      
+      $scope.venda = {};
+      $scope.venda.valorTotal = 0;
+      $scope.produtosVenda = [];
+      $scope.showAlert = function(ev,message,title = "Alerta") {
         // Appending dialog to document.body to cover sidenav in docs app
         // Modal dialogs should fully cover application
         // to prevent interaction outside of dialog
@@ -109,11 +134,24 @@
           );
       }
 
-      $scope.vender = function($event) {
+
+      $scope.vender = function($event) {        
+        var objVenda = {cliente: $scope.venda.cliente, produtos: angular.copy($scope.produtosVenda)};
+        
+        angular.forEach(objVenda.produtos,function(obj){
+          //verifico se ja existe o produto com mesmo tamanho e codigo
+          delete obj.imagem;
+          delete obj.nome;
+          delete obj.precoVenda;
+          delete obj.tamanho;
+          delete obj.cod;          
+        });     
+
+
         $http({
           method : "POST",
           url : "vender.php",
-          data    : $scope.venda, //forms user object
+          data    : objVenda, //forms user object
           headers : {'Content-Type': 'application/x-www-form-urlencoded'} 
         }).then(function mySucces(response) {
 
@@ -141,14 +179,31 @@
       }
 
       $scope.adicionarProdutos = function(){
-        
-        if($scope.venda.produto != 0){
-          $scope.produtosVenda = $scope.produtosVenda.concat([$scope.venda.produto]);
-        }
-        $scope.venda.produto = 0;
-      }
+        var existe = false;
+        $scope.venda.produto.qtd = $scope.venda.produto.qtd || 1;//se nao preencher a quantidade, coloca 1
 
-     
+        if($scope.venda.produto != 0)
+        {//se existir algum produto escolhido
+
+          angular.forEach($scope.produtosVenda,function(obj){
+              //verifico se ja existe o produto com mesmo tamanho e codigo
+              if(obj.tamanho == $scope.venda.produto.tamanho && obj.cod == $scope.venda.produto.cod){
+                obj.qtd += $scope.venda.produto.qtd;
+                existe = true;
+              }
+            });     
+
+          if(!existe){
+            $scope.produtosVenda = $scope.produtosVenda.concat([angular.copy($scope.venda.produto)]);    
+            $scope.venda.valorTotal += (parseFloat($scope.venda.produto.precoVenda) || 0);
+          }
+        }
+        console.log($scope.produtosVenda);
+        $scope.venda.produto = 0;
+      }    
+
+
+
       /**
       * Supplies a function that will continue to operate until the
       * time is up.

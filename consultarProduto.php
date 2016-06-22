@@ -17,7 +17,14 @@
     		
     $result = mysqli_query($conexao->connect(),$sql);
     while($row = mysqli_fetch_array($result)){
-        $retorno[] = array("nome" => $row["nome"],"imagem" => $row["imagem"], "precoVenda"=>$row["preco_venda"]);
+        $retorno[] = array(
+    		"nome" => $row["nome"]
+    		,"imagem" => $row["imagem"]
+    		, "precoVenda"=>$row["preco_venda"]
+    		,"tamanho" => $row["tamanho"]
+    		,"cod" => $row["cod"]
+    		,"id" => $row["id"]
+    	);
     }
     echo json_encode($retorno);
     
