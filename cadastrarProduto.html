@@ -57,7 +57,18 @@
           <label>Preço de Venda</label>
           <input ng-model="produto.precoVenda" ng-required="true">
         </md-input-container>
-        {{files}}
+
+        <md-input-container class="md-block" flex-gt-sm="">
+          <label>Tamanho</label>
+          <input ng-model="produto.tamanho" ng-required="true">
+        </md-input-container>
+
+        <md-input-container class="md-block" flex-gt-sm="">
+          <label>Promoção</label><br/>
+          <md-switch ng-model="produto.promocao" aria-label="Switch 1">
+            
+          </md-switch>
+        </md-input-container>
 
         <lf-ng-md-file-input name="files" lf-files="files" lf-on-file-click="onFileClick" preview drag multiple></lf-ng-md-file-input>
         <br/>

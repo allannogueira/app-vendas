@@ -7,6 +7,8 @@ class Produto{
     private $precoCusto;
     private $precoVenda;
     private $estoque;
+    private $promocao;
+    private $tamanho;
     
     /**
      * Gets the value of id.
@@ -153,6 +155,55 @@ class Produto{
         return $this;
     }
 
+    /**
+     * Gets the value of id.
+     *
+     * @return mixed
+     */
+    public function getPromocao()
+    {
+        return $this->promocao;
+    }
+
+    /**
+     * Sets the value of id.
+     *
+     * @param mixed $id the id
+     *
+     * @return self
+     */
+    public function setPromocao($promocao)
+    {
+        $this->promocao = $promocao;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of id.
+     *
+     * @return mixed
+     */
+    public function getTamanho()
+    {
+        return $this->tamanho;
+    }
+
+    /**
+     * Sets the value of id.
+     *
+     * @param mixed $id the id
+     *
+     * @return self
+     */
+    public function setTamanho($tamanho)
+    {
+        $this->tamanho = $tamanho;
+
+        return $this;
+    }
+
+
     public function salvar($conexao){
         if($this->getCod() == "")
             return "Por favor, preencha o código do produto.";
@@ -163,6 +214,8 @@ class Produto{
                     ,preco_custo
                     ,preco_venda
                     ,estoque       
+                    ,promocao
+                    ,tamanho
                 )
                 VALUES(
                     '".$this->getCod()."'
@@ -170,6 +223,8 @@ class Produto{
                     ,'".$this->getPrecoCusto()."'
                     ,'".$this->getPrecoVenda()."'
                     ,'".$this->getEstoque()."'
+                    ,'".$this->getPromocao()."'
+                    ,'".$this->getTamanho()."'
                 )
         ";      
         $result = mysqli_query($conexao,$sql);
@@ -179,7 +234,6 @@ class Produto{
             $this->setId($id);
             return $id;
         }
-
         return $result;
     }
 

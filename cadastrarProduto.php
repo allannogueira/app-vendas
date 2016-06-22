@@ -16,7 +16,7 @@
     $name = $_FILES['files']['name'];
     $tam = sizeof($path);
 
-    for($i = 0;$i < $tam; $i++);
+    for($i = 0;$i < $tam; $i++)
     {        
       $type = pathinfo($name[$i], PATHINFO_EXTENSION);
       $getContents = file_get_contents($path[$i]);
@@ -35,6 +35,8 @@
     $produto->setPrecoCusto($_POST['precoCusto']);
     $produto->setPrecoVenda($_POST['precoVenda']);
     $produto->setEstoque($_POST['estoque']);
+    $produto->setPromocao($_POST['promocao']);
+    $produto->setTamanho($_POST['tamanho']);
     echo $produto->salvar($conexao->connect());   
   }
     
