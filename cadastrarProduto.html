@@ -38,11 +38,26 @@
     </div>
     <md-content flex layout-padding>                
       <form action="#"  novalidate>
+        <input type="hidden" ng-model="produto.id"/>
         <md-input-container class="md-block" flex-gt-sm="">
           <label>Codigo do Produto</label>
-          <input ng-model="produto.codigo" ng-required="true">
+          <input ng-model="produto.cod" ng-required="true">
         </md-input-container>
 
+         <md-input-container class="md-block" flex-gt-sm="">
+            <label>Tamanho</label>
+            <md-select ng-model="produto.tamanho" ng-required="true" ng-change="verificaProdutoExiste()">
+              <md-option ng-repeat="tamanho in tamanhos" value="{{tamanho.tam}}">
+                {{tamanho.tam}}
+              </md-option>
+            </md-select>
+          </md-input-container>
+         
+         <md-input-container class="md-block" flex-gt-sm="">
+          <label>Quantidade</label>
+          <input type="number" ng-model="produto.estoque">
+        </md-input-container>
+          
         <md-input-container class="md-block" flex-gt-sm="">
           <label>Nome do Produto</label>
           <input ng-model="produto.nome">
@@ -50,17 +65,12 @@
 
         <md-input-container class="md-block" flex-gt-sm="">
           <label>Preço de Custo</label>
-          <input ng-model="produto.precoCusto" ng-required="true">
+          <input ng-model="produto.precoCusto" ng-required="true" ng-blur="copiaPrecoCusto()">
         </md-input-container>
 
         <md-input-container class="md-block" flex-gt-sm="">
           <label>Preço de Venda</label>
           <input ng-model="produto.precoVenda" ng-required="true">
-        </md-input-container>
-
-        <md-input-container class="md-block" flex-gt-sm="">
-          <label>Tamanho</label>
-          <input ng-model="produto.tamanho" ng-required="true">
         </md-input-container>
 
         <md-input-container class="md-block" flex-gt-sm="">
@@ -96,6 +106,8 @@
 
   .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log) { 
     $scope.toggleLeft = buildDelayedToggler('left');
+    $scope.tamanhos = [{tam: 'PP'},{tam: 'P'},{tam: 'M'},{tam: 'G'},{tam: 'GG'}];
+
     $scope.showAlert = function(ev,message,title = "Alerta") {
         // Appending dialog to document.body to cover sidenav in docs app
         // Modal dialogs should fully cover application
@@ -115,6 +127,25 @@
       $scope.$watch('files.length',function(newVal,oldVal){
         console.log($scope.files);
       });
+
+      $scope.copiaPrecoCusto = function(){
+        $scope.produto.precoVenda = $scope.produto.precoVenda || angular.copy($scope.produto.precoCusto);        
+      }
+
+      $scope.verificaProdutoExiste = function(){
+        $http.post("controller/consultarProduto.php",{cod:$scope.produto.cod, tamanho:$scope.produto.tamanho}).then(function(response)  {
+            if(response.data != "null"){                     
+              $scope.produto = response.data[0];
+            }else{
+              var cod = $scope.produto.cod;
+              var tamanho = $scope.produto.tamanho;
+              $scope.produto = {};
+              $scope.produto.cod = cod;
+              $scope.produto.tamanho = tamanho;
+            }
+           //$scope.srcimg = response.data;
+        });
+      }
       
       $scope.salvarProduto = function($event) {      
         var codProduto = "";
@@ -125,11 +156,11 @@
           console.log($scope.files);
           formData.append('files[]', obj.lfFile);
         });
-        
+
         //salva os dados do produto
         $http({
           method : "POST",
-          url : "cadastrarProduto.php",
+          url : "controller/cadastrarProduto.php",
           data    : $scope.produto, //forms user object
           headers : {'Content-Type': 'application/x-www-form-urlencoded'} 
         }).then(function mySucces(response) {  
@@ -138,7 +169,7 @@
               $scope.showAlert($event,"Salvo com sucesso!");
               codProduto = response.data;
               //envia as imagens para o cadastro de produtos
-              $http.post("cadastrarProduto.php?codProduto="+codProduto, formData, {
+              $http.post("constroller/cadastrarProduto.php?codProduto="+codProduto, formData, {
                 transformRequest: angular.identity,
                 headers: {'Content-Type': undefined}
               })

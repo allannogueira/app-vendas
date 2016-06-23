@@ -119,7 +119,7 @@
       $scope.salvarCliente = function($event) {
         $http({
           method : "POST",
-          url : "cadastrarCliente.php",
+          url : "controller/cadastrarCliente.php",
           data    : $scope.cliente, //forms user object
           headers : {'Content-Type': 'application/x-www-form-urlencoded'} 
         }).then(function mySucces(response) {

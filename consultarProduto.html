@@ -83,7 +83,7 @@
         console.log($scope.files);
       });
       
-      $scope.consultarProduto = function($event) {      
+      $scope.consultarProduto = function($event) {
         var codProduto = "";
         $scope.produtos = "";
         //carrega as imagens em um FormData()
@@ -93,7 +93,7 @@
           formData.append('files[]', obj.lfFile);
         });
         
-        $http.get("consultarProduto.php").then(function(response)  {                    
+        $http.get("controller/consultarProduto.php").then(function(response)  {
            console.log(response);
            $scope.produtos = response.data;
            //$scope.srcimg = response.data;

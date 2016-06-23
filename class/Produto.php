@@ -208,43 +208,64 @@ class Produto{
         if($this->getCod() == "")
             return "Por favor, preencha o código do produto.";
 
-        $sql = "INSERT INTO ddc_app_vendas.produto (
-                    cod
-                    ,nome
-                    ,preco_custo
-                    ,preco_venda
-                    ,estoque       
-                    ,promocao
-                    ,tamanho
-                )
-                VALUES(
-                    '".$this->getCod()."'
-                    ,'".$this->getNome()."'
-                    ,'".$this->getPrecoCusto()."'
-                    ,'".$this->getPrecoVenda()."'
-                    ,'".$this->getEstoque()."'
-                    ,'".$this->getPromocao()."'
-                    ,'".$this->getTamanho()."'
-                )
-        ";      
-        $result = mysqli_query($conexao,$sql);
+        if($this->id == ""){
+            $sql = "INSERT INTO ddc_app_vendas.produto (
+            cod
+            ,nome
+            ,preco_custo
+            ,preco_venda
+            ,estoque       
+            ,promocao
+            ,tamanho
+            )
+            VALUES(
+            '".$this->getCod()."'
+            ,'".$this->getNome()."'
+            ,'".$this->getPrecoCusto()."'
+            ,'".$this->getPrecoVenda()."'
+            ,'".$this->getEstoque()."'
+            ,'".$this->getPromocao()."'
+            ,'".$this->getTamanho()."'
+            )
+            ";      
+            $result = mysqli_query($conexao,$sql);
 
-        if($result){
-            $id = mysqli_insert_id($conexao);
-            $this->setId($id);
-            return $id;
+            if($result){
+                $id = mysqli_insert_id($conexao);
+                $this->setId($id);
+                return $id;
+            }
+        }else{
+            $result = $this->atualizar($conexao);
         }
         return $result;
+    }
+
+    public function atualizar($conexao){
+        $sql = "UPDATE ddc_app_vendas.produto 
+        SET
+        cod =  '".$this->getCod()."'
+        ,nome = '".$this->getNome()."'
+        ,preco_custo = '".$this->getPrecoCusto()."'
+        ,preco_venda = '".$this->getPrecoVenda()."'
+        ,estoque = '".$this->getEstoque()."'  
+        ,promocao = '".$this->getPromocao()."'
+        ,tamanho = '".$this->getTamanho()."'
+        WHERE
+            id = '".$this->id."'
+
+        ";      
+        return mysqli_query($conexao,$sql);
     }
 
     public function listar($conexao){
         $retorno = "";
         $sql = "SELECT 
-                    P.*,
-                    PI.imagem
-                FROM 
-                    ddc_app_vendas.produto_imagens PI 
-                    INNER JOIN ddc_app_vendas.produto P on P.id = PI.produto_id";
+        P.*,
+        PI.imagem
+        FROM 
+        ddc_app_vendas.produto_imagens PI 
+        INNER JOIN ddc_app_vendas.produto P on P.id = PI.produto_id";
         $result = mysqli_query($conexao,$sql);
         
         while($row = mysqli_fetch_array($result)){

@@ -44,7 +44,7 @@
               <md-icon class="material-icons">&#xE7FD;</md-icon>
               <label>Cliente</label>
               <md-select placeholder="Cliente" ng-model="venda.cliente" ng-required="true" md-on-open="carregarClientes()" style="min-width: 200px;">
-                <md-option ng-value="cliente.id" ng-repeat="cliente in clientes"> &nbsp; {{cliente.nome}}</md-option>
+                <md-option ng-value="cliente.id" ng-repeat="cliente in clientes track by $index"> &nbsp; {{cliente.nome}}</md-option>
               </md-select>
             </md-input-container>        
 
@@ -53,7 +53,7 @@
               <md-input-container layout="column" flex="70">
                 <md-icon class="material-icons">add_shopping_cart</md-icon>
                 <md-select  placeholder="Produto" ng-model="venda.produto" ng-required="true" md-on-open="carregarProdutos()">
-                  <md-option ng-value="produto" ng-repeat="produto in produtos">
+                  <md-option ng-value="produto" ng-repeat="produto in produtos track by $index">
                     <img style="max-height: 20px;" src="{{produto.imagem}}" /> {{produto.nome}} - {{produto.tamanho}} - {{produto.precoVenda | currency}}
                   </md-option>
                 </md-select>
@@ -150,7 +150,7 @@
 
         $http({
           method : "POST",
-          url : "vender.php",
+          url : "controller/vender.php",
           data    : objVenda, //forms user object
           headers : {'Content-Type': 'application/x-www-form-urlencoded'} 
         }).then(function mySucces(response) {
@@ -167,13 +167,13 @@
       };
 
       $scope.carregarClientes = function(){
-        $scope.clientes || $http.get("consultarCliente.php").then(function(response) {
+        $scope.clientes || $http.get("controller/consultarCliente.php").then(function(response) {
           $scope.clientes = response.data;
         });
       }
 
       $scope.carregarProdutos = function(){
-        $scope.produtos || $http.get("consultarProduto.php").then(function(response) {
+        $scope.produtos || $http.get("controller/consultarProduto.php").then(function(response) {
           $scope.produtos = response.data;
         });
       }
