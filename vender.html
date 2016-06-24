@@ -76,13 +76,14 @@
 
             <md-list class="md-dense" flex="">
               <md-subheader class="md-no-sticky">Itens selecionados</md-subheader>
-              <md-list-item class="md-3-line" ng-repeat="item in produtosVenda track by $index" ng-click="null">
+              <md-list-item class="md-3-line" ng-repeat="item in produtosVenda track by $index" ng-click="remove($event,produtosVenda,$index)">
                 <img ng-src="{{item.imagem}}" class="md-avatar" alt="{{item.nome}}" />
                 <div class="md-list-item-text" layout="column" flex="33">
                   <h3>{{item.qtd}}x - {{ item.nome }} - {{item.cod}}</h3>
                   <h4>{{ item.tamanho }}</h4>
                   <p>{{ item.precoVenda | currency }}</p>
                 </div>
+                <md-icon class="material-icons" layout-align="right right" >delete</md-icon>
               </md-list-item>
             </md-list>
             <md-list class="md-dense" flex="">
@@ -134,7 +135,39 @@
           );
       }
 
+      $scope.showConfirm = function(ev, message, title = 'Confirma?') {
+        // Appending dialog to document.body to cover sidenav in docs app
+        var confirm = $mdDialog.confirm()
+              .title(title)
+              .textContent(message)
+              .ariaLabel('Lucky day')
+              .targetEvent(ev)
+              .ok('Sim')
+              .cancel('Não');
+        return confirm;
+       
+      };
 
+      $scope.remove = function(ev,array,index){
+        title = "Remover";
+        message = "Tem certeza que deseja remover o produto?";
+
+        var confirm = $scope.showConfirm(ev,message,title);
+
+        
+         $mdDialog.show(confirm).then(function() {
+            //procura o objeto por index
+            $scope.produtosVenda.map(function (item) {
+                $scope.venda.valorTotal -= item.precoVenda;
+            }).indexOf(index);
+            array.splice(index,1); 
+        }, function() {
+          $scope.status = 0;
+        });
+
+
+        
+      }
       $scope.vender = function($event) {        
         var objVenda = {cliente: $scope.venda.cliente, produtos: angular.copy($scope.produtosVenda)};
         
