@@ -1,0 +1,36 @@
+.md-sidenav-left .md-button{
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
+  box-shadow: none;
+  border-bottom: 1px solid #CCC;
+  text-align: left;
+  padding: 5px 0px;
+}
+
+.md-sidenav-left .md-button{
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.md-sidenav-left .md-button md-icon{        
+  padding-right: 15px;
+}
+
+.md-theme-indigo{
+  min-height: 150px;  
+  padding: 10px;
+  background-color: white !important;
+  border-bottom: 1px solid #CCC;
+}
+.circle{  
+  font-family: times new roman;
+  padding-top: 23px;
+  font-style: italic;
+  border-radius: 100%;
+  width: 100px;
+  height: 100px;
+  background: #FF1F65;
+  margin: auto;
+  text-align: center;
+}

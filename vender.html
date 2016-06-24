@@ -4,6 +4,7 @@
   <!-- Angular Material style sheet -->
   <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="css/menu.css">
   <style>
     md-list.md-dense md-list-item.md-3-line, md-list.md-dense md-list-item.md-3-line>._md-no-style {
       min-height: 85px;
@@ -29,52 +30,63 @@
 
       <div layout="column"  ng-cloak>
         <section layout="row" flex>
-          <md-sidenav class="md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" md-disable-backdrop md-whiteframe="4" style="top: 50px">
-     
+          <md-sidenav class="md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" md-disable-backdrop md-whiteframe="4" style="top: 57px">
+            <md-toolbar class="md-theme-indigo">
+              <div class="circle">
+                Marcy<br/>
+                Lingerie
+              </div>
+            </md-toolbar> 
             <div class="mdl-layout__drawer" ng-include="'menu.html'"></div>
           </md-sidenav>   
         </section>
       </div>
 
-
       <div layout="column" flex="100">
         <md-content flex layout-padding>   
-          <form action="#"  novalidate>
+          <form action="#" ng-submit="vender($event)" ng-model="formVenda"  novalidate>
             <md-input-container class="md-block" flex-gt-sm="100">
               <md-icon class="material-icons">&#xE7FD;</md-icon>
               <label>Cliente</label>
-              <md-select placeholder="Cliente" ng-model="venda.cliente" ng-required="true" md-on-open="carregarClientes()" style="min-width: 200px;">
+              <md-select name="cliente" placeholder="Cliente" ng-model="venda.cliente" ng-required="true" md-on-open="carregarClientes()" style="min-width: 200px;">
                 <md-option ng-value="cliente.id" ng-repeat="cliente in clientes track by $index"> &nbsp; {{cliente.nome}}</md-option>
               </md-select>
+              <p ng-show="formVenda.cliente.$invalid && !formVenda.cliente.$pristine" class="help-block">Cliente é obrigatório</p>
             </md-input-container>        
-
+{{formVenda.$valid}}
 
             <div layout-wrap  layout="row" flex>
-              <md-input-container layout="column" flex="70">
+              <md-input-container layout="column" flex="80">
                 <md-icon class="material-icons">add_shopping_cart</md-icon>
-                <md-select  placeholder="Produto" ng-model="venda.produto" ng-required="true" md-on-open="carregarProdutos()">
+                <md-select  name="produto" placeholder="Produto" ng-model="venda.produto" ng-required="true" md-on-open="carregarProdutos()">
                   <md-option ng-value="produto" ng-repeat="produto in produtos track by $index">
                     <img style="max-height: 20px;" src="{{produto.imagem}}" /> {{produto.nome}} - {{produto.tamanho}} - {{produto.precoVenda | currency}}
                   </md-option>
                 </md-select>
               </md-input-container>
 
-             
-                <md-input-container flex="20">
-                  <label>QTD</label>
-                  <input type="number"  ng-model="venda.produto.qtd">
-                </md-input-container>
+              <md-input-container flex="10">
+                <label>QTD</label>
+                <input type="number"  ng-model="venda.produto.qtd">
+              </md-input-container>
 
-                <div  flex="10">
-                  <md-button class="md-fab md-mini md-primary"  ng-click="adicionarProdutos()" >+</md-button>
-                </div>
-             
+              <div  flex="10"  ng-show="venda.produto != null && venda.produto != ''">
+                <md-button class="md-fab md-mini md-primary"  ng-click="adicionarProdutos()" >+</md-button>
+              </div>
             </div>  
+
+            <div layout="row">
+                <md-input-container class="md-inline" flex>
+                  <label>Reserva</label>
+                  <md-switch ng-model="venda.reserva" aria-label="Switch 1">
+
+                  </md-switch>
+                </md-input-container>
+              </div>
             <br/>
             <!-- Colored raised button -->            
 
-
-            <md-list class="md-dense" flex="">
+            <md-list class="md-dense" flex="" ng-show="produtosVenda != ''">
               <md-subheader class="md-no-sticky">Itens selecionados</md-subheader>
               <md-list-item class="md-3-line" ng-repeat="item in produtosVenda track by $index" ng-click="remove($event,produtosVenda,$index)">
                 <img ng-src="{{item.imagem}}" class="md-avatar" alt="{{item.nome}}" />
@@ -86,13 +98,12 @@
                 <md-icon class="material-icons" layout-align="right right" >delete</md-icon>
               </md-list-item>
             </md-list>
-            <md-list class="md-dense" flex="">
+
+
+            <md-list class="md-dense" flex=""  ng-show="produtosVenda != ''">
               <md-subheader class="md-no-sticky">Valor Total: <strong>{{venda.valorTotal | currency}}</strong></md-subheader>             
             </md-list>
-
-
-
-            <md-button class="md-primary md-raised" ng-click="vender($event)">
+            <md-button type="submit" class="md-primary md-raised" ng-show="produtosVenda != ''">
               Realizar Venda
             </md-button>
           </form>
@@ -109,12 +120,17 @@
   <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
   <!-- Angular Material Library -->
   <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
+  <script src="js/angular-locale_pt-br.js"></script>
 
   <script type="text/javascript">
     angular.module('myApp', ['ngMaterial'])
-
+    .config(function($mdThemingProvider) {
+      $mdThemingProvider.theme('default')
+      .primaryPalette('pink')
+      .accentPalette('orange');
+    })
     .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log) {
-
+      $scope.formVenda = {};
       $scope.toggleLeft = buildDelayedToggler('left');      
       $scope.venda = {};
       $scope.venda.valorTotal = 0;
@@ -138,14 +154,13 @@
       $scope.showConfirm = function(ev, message, title = 'Confirma?') {
         // Appending dialog to document.body to cover sidenav in docs app
         var confirm = $mdDialog.confirm()
-              .title(title)
-              .textContent(message)
-              .ariaLabel('Lucky day')
-              .targetEvent(ev)
-              .ok('Sim')
-              .cancel('Não');
+        .title(title)
+        .textContent(message)
+        .ariaLabel('Lucky day')
+        .targetEvent(ev)
+        .ok('Sim')
+        .cancel('Não');
         return confirm;
-       
       };
 
       $scope.remove = function(ev,array,index){
@@ -155,48 +170,47 @@
         var confirm = $scope.showConfirm(ev,message,title);
 
         
-         $mdDialog.show(confirm).then(function() {
+        $mdDialog.show(confirm).then(function() {
             //procura o objeto por index
-            $scope.produtosVenda.map(function (item) {
-                $scope.venda.valorTotal -= item.precoVenda;
-            }).indexOf(index);
+            $scope.venda.valorTotal -= $scope.produtosVenda[index].precoVenda * $scope.produtosVenda[index].qtd;
             array.splice(index,1); 
-        }, function() {
-          $scope.status = 0;
-        });
-
-
-        
+          }, function() {
+            $scope.status = 0;
+          });
       }
+
       $scope.vender = function($event) {        
-        var objVenda = {cliente: $scope.venda.cliente, produtos: angular.copy($scope.produtosVenda)};
-        
-        angular.forEach(objVenda.produtos,function(obj){
-          //verifico se ja existe o produto com mesmo tamanho e codigo
-          delete obj.imagem;
-          delete obj.nome;
-          delete obj.precoVenda;
-          delete obj.tamanho;
-          delete obj.cod;          
-        });     
+        if($scope.formVenda.$valid)
+        {
+          var objVenda = {cliente: $scope.venda.cliente, reserva: venda.reserva, produtos: angular.copy($scope.produtosVenda)};
+
+          angular.forEach(objVenda.produtos,function(obj) {
+            //verifico se ja existe o produto com mesmo tamanho e codigo
+            delete obj.imagem;
+            delete obj.nome;
+            delete obj.precoVenda;
+            delete obj.tamanho;
+            delete obj.cod;          
+          });     
 
 
-        $http({
-          method : "POST",
-          url : "controller/vender.php",
-          data    : objVenda, //forms user object
-          headers : {'Content-Type': 'application/x-www-form-urlencoded'} 
-        }).then(function mySucces(response) {
+          $http({
+            method : "POST",
+            url : "controller/vender.php",
+            data    : objVenda, //forms user object
+            headers : {'Content-Type': 'application/x-www-form-urlencoded'} 
+          }).then(function mySucces(response) {
 
-          if(response.data){
-            $scope.showAlert($event,"Salvo com sucesso!");
-          }else{
-            $scope.showAlert($event,"Desculpe, não foi possível salvar!");
-          }          
-        }, 
-        function myError(response) {
-          console.log(response.statusText);
-        });
+            if(response.data){
+              $scope.showAlert($event,"Salvo com sucesso!");
+            }else{
+              $scope.showAlert($event,"Desculpe, não foi possível salvar!");
+            }          
+          }, 
+          function myError(response) {
+            console.log(response.statusText);
+          });
+        }
       };
 
       $scope.carregarClientes = function(){
@@ -222,13 +236,14 @@
               //verifico se ja existe o produto com mesmo tamanho e codigo
               if(obj.tamanho == $scope.venda.produto.tamanho && obj.cod == $scope.venda.produto.cod){
                 obj.qtd += $scope.venda.produto.qtd;
+                $scope.venda.valorTotal += (parseFloat($scope.venda.produto.precoVenda) || 0 * $scope.produtosVenda[index].qtd );
                 existe = true;
               }
             });     
 
           if(!existe){
             $scope.produtosVenda = $scope.produtosVenda.concat([angular.copy($scope.venda.produto)]);    
-            $scope.venda.valorTotal += (parseFloat($scope.venda.produto.precoVenda) || 0);
+            $scope.venda.valorTotal += (parseFloat($scope.venda.produto.precoVenda) || 0 * $scope.produtosVenda[index].qtd );
           }
         }
         console.log($scope.produtosVenda);

@@ -15,6 +15,7 @@
 	$cliente->setCidade($_POST['cidade']);
 	$cliente->setNome($_POST['nome']);
 	$cliente->setCpf($_POST['cpf']);  	
+	$cliente->setCredito($_POST['credito']);  	
 	
 	echo $cliente->salvar($conexao->connect()); 	
 ?>

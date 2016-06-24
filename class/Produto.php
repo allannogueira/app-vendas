@@ -9,6 +9,7 @@ class Produto{
     private $estoque;
     private $promocao;
     private $tamanho;
+    private $reserva;
     
     /**
      * Gets the value of id.
@@ -203,6 +204,30 @@ class Produto{
         return $this;
     }
 
+    /**
+     * Gets the value of reserva.
+     *
+     * @return mixed
+     */
+    public function getReserva()
+    {
+        return $this->reserva;
+    }
+
+    /**
+     * Sets the value of reserva.
+     *
+     * @param mixed $reserva the reserva
+     *
+     * @return self
+     */
+    public function setReserva($reserva)
+    {
+        $this->reserva = $reserva;
+
+        return $this;
+    }
+
 
     public function salvar($conexao){
         if($this->getCod() == "")
@@ -217,15 +242,17 @@ class Produto{
             ,estoque       
             ,promocao
             ,tamanho
+            ,reserva
             )
             VALUES(
-            '".$this->getCod()."'
-            ,'".$this->getNome()."'
-            ,'".$this->getPrecoCusto()."'
-            ,'".$this->getPrecoVenda()."'
-            ,'".$this->getEstoque()."'
-            ,'".$this->getPromocao()."'
-            ,'".$this->getTamanho()."'
+            '".$this->cod."'
+            ,'".$this->nome."'
+            ,'".$this->precoCusto."'
+            ,'".$this->precoVenda."'
+            ,'".$this->estoque."'
+            ,'".$this->promocao."'
+            ,'".$this->tamanho."'
+            ,'".$this->reserva."'
             )
             ";      
             $result = mysqli_query($conexao,$sql);
@@ -244,13 +271,14 @@ class Produto{
     public function atualizar($conexao){
         $sql = "UPDATE ddc_app_vendas.produto 
         SET
-        cod =  '".$this->getCod()."'
-        ,nome = '".$this->getNome()."'
-        ,preco_custo = '".$this->getPrecoCusto()."'
-        ,preco_venda = '".$this->getPrecoVenda()."'
-        ,estoque = '".$this->getEstoque()."'  
-        ,promocao = '".$this->getPromocao()."'
-        ,tamanho = '".$this->getTamanho()."'
+        cod =  '".$this->cod."'
+        ,nome = '".$this->nome."'
+        ,preco_custo = '".$this->precoCusto."'
+        ,preco_venda = '".$this->precoVenda."'
+        ,estoque = '".$this->estoque."'  
+        ,promocao = '".$this->promocao."'
+        ,tamanho = '".$this->tamanho."'
+        ,reserva = '".$this->reserva."'
         WHERE
             id = '".$this->id."'
 

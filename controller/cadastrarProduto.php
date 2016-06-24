@@ -38,6 +38,7 @@
     $produto->setEstoque($_POST['estoque']);
     $produto->setPromocao($_POST['promocao']);
     $produto->setTamanho($_POST['tamanho']);
+    $produto->setReserva($_POST['reserva']);
     echo $produto->salvar($conexao->connect());   
   }
     

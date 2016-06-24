@@ -8,10 +8,8 @@ class Cliente{
 	private $estado;
 	private $cpf;
 	private $telefone;
+    private $credito;
 
-	public function construct(){
-		
-	}
 
     /**
      * Gets the value of nome.
@@ -205,6 +203,30 @@ class Cliente{
         return $this;
     }
 
+    /**
+     * Gets the value of telefone.
+     *
+     * @return mixed
+     */
+    public function getCredito()
+    {
+        return $this->credito;
+    }
+
+    /**
+     * Sets the value of telefone.
+     *
+     * @param mixed $telefone the telefone
+     *
+     * @return self
+     */
+    public function setCredito($credito)
+    {
+        $this->credito = $credito;
+
+        return $this;
+    }
+
     public function salvar($conexao){
     	$sql = "INSERT INTO ddc_app_vendas.cliente (
 		    		telefone
@@ -214,17 +236,19 @@ class Cliente{
 				  	,estado
 				  	,cidade
 				  	,nome
-				  	,cpf  		
+				  	,cpf	
+                    ,credito
 		    	)
 		    	VALUES(
-		    		'".$this->getTelefone()."'
-		    		,'".$this->getEndereco()."'
-		    		,'".$this->getNumero()."'
-		    		,'".$this->getBairro()."'
-		    		,'".$this->getEstado()."'
-		    		,'".$this->getCidade()."'
-		    		,'".$this->getNome()."'
-		    		,'".$this->getCpf()."'
+		    		'".$this->telefone."'
+		    		,'".$this->endereco."'
+		    		,'".$this->numero."'
+		    		,'".$this->bairro."'
+		    		,'".$this->estado."'
+		    		,'".$this->cidade."'
+		    		,'".$this->nome."'
+		    		,'".$this->cpf."'
+                    ,'".$this->credito."'
 		    	)
     	";    	
     	$result = mysqli_query($conexao,$sql);
