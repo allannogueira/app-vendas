@@ -12,12 +12,22 @@
 	$cliente = $_POST['cliente'];
     $reserva = $_POST['reserva'];
 	$produtos = $_POST['produtos'];
+    $valorBonus = $_POST['valorBonus'];
 	//$valorDesconto = $_POST['valorDesconto'];
-	//$valorPago = $_POST['valorPago'];
+	$valorPago = $_POST['valorPago'];
 
+
+    //formatando dinheiro para salvar corretamente no banco de dados
+    $valorPago = str_replace(".", "", $valorPago);
+    $valorPago = str_replace(",", ".", $valorPago);
+
+    $valorBonus = str_replace(",", ".", $valorBonus);
+    $valorBonus = str_replace(",", ".", $valorBonus);
+
+    //classe Venda
 	$venda->setDataVenda(date("Y-m-d"));
     $venda->setValorDesconto("");
-    $venda->setValorPago("");
+    $venda->setValorPago($valorPago);
     $venda->setClienteId($cliente);
     $venda->setReserva($reserva);
     $venda->salvar($conexao->connect());
@@ -30,6 +40,11 @@
     		$vendaProduto->setQtdProduto($produto["qtd"]);//quantidade do produto que esta sendo vendido
     		$vendaProduto->salvar($conexao->connect());
     	}
+
+        //salva o valor do bonus no cadastro do cliente
+        if($valorBonus > 0){
+            //implementar ....
+        }
     	echo 1;
     }else{
     	echo 0;

@@ -6,6 +6,7 @@ class Venda{
     private $valorDesconto;
     private $valorPago;
     private $clienteId;
+    private $reserva;
 
 
     /**
@@ -128,18 +129,44 @@ class Venda{
         return $this;
     }
 
+    /**
+     * Gets the value of clienteId.
+     *
+     * @return mixed
+     */
+    public function getReserva()
+    {
+        return $this->reserva;
+    }
+
+    /**
+     * Sets the value of clienteId.
+     *
+     * @param mixed $clienteId the cliente id
+     *
+     * @return self
+     */
+    public function setReserva($reserva)
+    {
+        $this->reserva = $reserva;
+
+        return $this;
+    }
+
     public function salvar($conexao){
         $sql = "INSERT INTO ddc_app_vendas.venda (
                     data_venda
                     ,valor_desconto
                     ,valor_pago
                     ,cliente_id
+                    ,reserva
                 )
                 VALUES(
                     '".$this->dataVenda."'
                     ,'".$this->valorDesconto."'
                     ,'".$this->valorPago."'
-                    ,'".$this->clienteId."'                    
+                    ,'".$this->clienteId."'    
+                    ,'".$this->reserva."'
                 )
         ";
         $result = mysqli_query($conexao,$sql);
