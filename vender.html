@@ -134,9 +134,10 @@
   <!-- Angular Material Library -->
   <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc.5/angular-material.min.js"></script>
   <script src="js/angular-locale_pt-br.js"></script>
+  <script src="http://aguirrel.github.io/ng-currency/dist/ng-currency.js"></script>
 
   <script type="text/javascript">
-    angular.module('myApp', ['ngMaterial'])
+    angular.module('myApp', ['ngMaterial','ng-currency'])
     .config(function($mdThemingProvider) {
       $mdThemingProvider.theme('default')
       .primaryPalette('pink')
@@ -178,19 +179,23 @@
 
 
       $scope.showAdvanced = function(ev) {
-        var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
-        $mdDialog.show({
-          controller: DialogController,
-          templateUrl: "dialogValorPago.html",
-          parent: angular.element(document.body),
-         // scope: $scope,
-          targetEvent: ev,
-          clickOutsideToClose:true,
-          fullscreen: useFullScreen,
-          locals: {
-            scope2: $scope
-         }
-        });
+        if($scope.formVenda.$valid){
+          var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+          $mdDialog.show({
+            controller: DialogController,
+            templateUrl: "dialog/valorPago.html",
+            parent: angular.element(document.body),
+            // scope: $scope,
+            targetEvent: ev,
+            clickOutsideToClose:true,
+            fullscreen: useFullScreen,
+            locals: {
+              scope2: $scope
+            }
+          });
+        }else{
+          $scope.showAlert(ev,"Verifique se selecionou o cliente.");
+        }
 
         
       };
@@ -211,12 +216,12 @@
           });
       }
 
-     $scope.vender = function($event) {   
-      if($scope.formVenda.$valid)
-      {
-        var objVenda = {cliente: $scope.venda.cliente, valorBonus: $scope.venda.valorBonus, reserva: $scope.venda.reserva, valorPago: $scope.venda.valorPago || 0, produtos: angular.copy($scope.produtosVenda)};
+      $scope.vender = function($event) {   
+        if($scope.formVenda.$valid)
+        {
+          var objVenda = {cliente: $scope.venda.cliente, valorBonus: $scope.venda.valorBonus, reserva: $scope.venda.reserva, valorPago: $scope.venda.valorPago || 0, produtos: angular.copy($scope.produtosVenda)};
 
-        angular.forEach(objVenda.produtos,function(obj) {
+          angular.forEach(objVenda.produtos,function(obj) {
             //verifico se ja existe o produto com mesmo tamanho e codigo
             delete obj.imagem;
             delete obj.nome;
@@ -225,9 +230,9 @@
             delete obj.cod;          
           });     
 
-        $http({
-          method : "POST",
-          url : "controller/vender.php",
+          $http({
+            method : "POST",
+            url : "controller/vender.php",
             data    : objVenda, //forms user object
             headers : {'Content-Type': 'application/x-www-form-urlencoded'} 
           }).then(function mySucces(response) {
@@ -322,10 +327,12 @@
   //quando montado o dialog
   function DialogController($scope, $mdDialog, $rootScope,scope2) {
     $scope.enviar = function(ev) {
-       scope2.venda.valorPago = $scope.venda.valorPago;
-       scope2.vender(ev);//.vender(ev);
-    };
-  }
-  </script>
-</body>  
-</html>
+      scope2.venda.valorPago = $scope.venda.valorPago;
+          scope2.vender(ev);//.vender(ev);
+          $mdDialog.hide();
+
+        };
+      }
+    </script>
+  </body>  
+  </html>

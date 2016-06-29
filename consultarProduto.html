@@ -5,7 +5,13 @@
   <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
   <link rel="stylesheet" href="css/lf-ng-md-file-input.css">  
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="css/menu.css">  
+  <link rel="stylesheet" href="css/menu.css">
+  <style>
+    md-list.md-dense md-list-item.md-3-line, md-list.md-dense md-list-item.md-3-line>._md-no-style {
+      min-height: 85px;
+      height: 85px;
+    }
+  </style>
 </head>
 <body ng-app="myApp">
   <div layout="column" ng-cloak style="height: 100%" ng-controller="AppCtrl">
@@ -15,28 +21,25 @@
           <md-icon md-svg-icon="img/icons/more_vert.svg"></md-icon>
         </md-button>
         <h2>
-          <span>App Vendas  - Cadastrar Produtos</span>
+          <span>APP VENDAS</span>
         </h2>
         <span flex></span>
       </div>
     </md-toolbar>
     <section layout="row" flex> 
-      <div layout="column" style="height:100%;" ng-cloak>
+      <div layout="column"  ng-cloak>
         <section layout="row" flex>
-          <md-sidenav 
-          class="md-sidenav-left"
-          md-component-id="left"
-          md-is-locked-open="$mdMedia('gt-md')"
-          md-disable-backdrop
-          md-whiteframe="4"
-          style="top: 50px">
-          <md-toolbar class="md-theme-indigo">
-            <h1 class="md-toolbar-tools">Menu</h1>
-          </md-toolbar>    
-          <div class="mdl-layout__drawer" ng-include="'menu.html'"></div>
-        </md-sidenav>   
-      </section>
-    </div>
+          <md-sidenav class="md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" md-disable-backdrop md-whiteframe="4" style="top: 57px">
+            <md-toolbar class="md-theme-indigo">
+              <div class="circle">
+                Marcy<br/>
+                Lingerie
+              </div>
+            </md-toolbar> 
+            <div class="mdl-layout__drawer" ng-include="'menu.html'"></div>
+          </md-sidenav>   
+        </section>
+      </div>
     <md-content flex layout-padding>     
       <div class="" ng-repeat="produto in produtos">
        <h2 class="">{{ produto.cod }}</h2>

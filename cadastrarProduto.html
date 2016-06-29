@@ -5,8 +5,13 @@
   <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
   <link rel="stylesheet" href="css/lf-ng-md-file-input.css">  
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="css/menu.css">  
-
+  <link rel="stylesheet" href="css/menu.css">
+  <style>
+    md-list.md-dense md-list-item.md-3-line, md-list.md-dense md-list-item.md-3-line>._md-no-style {
+      min-height: 85px;
+      height: 85px;
+    }
+  </style>
 </head>
 <body ng-app="myApp">
   <div layout="column" ng-cloak style="height: 100%" ng-controller="AppCtrl">
@@ -16,101 +21,108 @@
           <md-icon md-svg-icon="img/icons/more_vert.svg"></md-icon>
         </md-button>
         <h2>
-          <span>App Vendas  - Cadastrar Produtos</span>
+          <span>APP VENDAS</span>
         </h2>
         <span flex></span>
+        <md-button ng-click="produto = {}" class="md-primary md-raised">Cadastrar Novo</md-button>
+        <md-button ng-click="carregarProduto($event)" class="md-primary md-raised">Carregar Produto</md-button>
       </div>
-    </md-toolbar>
+    </md-toolbar>    
     <section layout="row" flex> 
-      <div layout="column" style="height:100%;" ng-cloak>
+      <div layout="column"  ng-cloak>
         <section layout="row" flex>
-          <md-sidenav 
-          class="md-sidenav-left"
-          md-component-id="left"
-          md-is-locked-open="$mdMedia('gt-md')"
-          md-disable-backdrop
-          md-whiteframe="4"
-          style="top: 50px">
-          <md-toolbar class="md-theme-indigo">
-            <h1 class="md-toolbar-tools">Menu</h1>
-          </md-toolbar>    
-          <div class="mdl-layout__drawer" ng-include="'menu.html'"></div>
-        </md-sidenav>   
-      </section>
-    </div>
-    <md-content flex layout-padding>                
-      <form action="#"  novalidate>
-        <input type="hidden" ng-model="produto.id"/>
-        <md-input-container class="md-block" flex-gt-sm="">
-          <label>Codigo do Produto</label>
-          <input ng-model="produto.cod" ng-required="true">
-        </md-input-container>
+          <md-sidenav class="md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" md-disable-backdrop md-whiteframe="4" style="top: 57px">
+            <md-toolbar class="md-theme-indigo">
+              <div class="circle">
+                Marcy<br/>
+                Lingerie
+              </div>
+            </md-toolbar> 
+            <div class="mdl-layout__drawer" ng-include="'menu.html'"></div>
+          </md-sidenav>   
+        </section>
+      </div>
 
-         <md-input-container class="md-block" flex-gt-sm="">
+      <md-content flex layout-padding>                
+        <form name="formProduto" ng-submit="salvarProduto($event)" novalidate>
+          <input name="id" type="hidden" ng-model="produto.id"/>
+          <md-input-container class="md-block" flex-gt-sm="">
+            <label>Codigo do Produto</label>
+            <input name="cod" ng-model="produto.cod" ng-required="true">
+          </md-input-container>
+
+          <md-input-container class="md-block" flex-gt-sm="">
             <label>Tamanho</label>
-            <md-select ng-model="produto.tamanho" ng-required="true" ng-change="verificaProdutoExiste()">
+            <md-select name="tamanho" ng-model="produto.tamanho" ng-required="true" ng-change="verificaProdutoExiste()">
               <md-option ng-repeat="tamanho in tamanhos" value="{{tamanho.tam}}">
                 {{tamanho.tam}}
               </md-option>
             </md-select>
           </md-input-container>
-         
-         <md-input-container class="md-block" flex-gt-sm="">
-          <label>Quantidade</label>
-          <input type="number" ng-model="produto.estoque">
-        </md-input-container>
+
+          <md-input-container class="md-block" flex-gt-sm="">
+            <label>Quantidade</label>
+            <input name="estoque" type="number" ng-model="produto.estoque">
+          </md-input-container>
           
-        <md-input-container class="md-block" flex-gt-sm="">
-          <label>Nome do Produto</label>
-          <input ng-model="produto.nome">
-        </md-input-container>
+          <md-input-container class="md-block" flex-gt-sm="">
+            <label>Nome do Produto</label>
+            <input name="nome" ng-model="produto.nome">
+          </md-input-container>
 
-        <md-input-container class="md-block" flex-gt-sm="">
-          <label>Preço de Custo</label>
-          <input ng-model="produto.precoCusto" ng-required="true" ng-blur="copiaPrecoCusto()">
-        </md-input-container>
+          <md-input-container class="md-block" flex-gt-sm="">
+            <label>Preço de Custo</label>
+            <input name="precoCusto" ng-model="produto.precoCusto" ng-required="true" ng-blur="copiaPrecoCusto()" ng-currency>
+          </md-input-container>
 
-        <md-input-container class="md-block" flex-gt-sm="">
-          <label>Preço de Venda</label>
-          <input ng-model="produto.precoVenda" ng-required="true">
-        </md-input-container>
+          <md-input-container class="md-block" flex-gt-sm="">
+            <label>Preço de Venda</label>
+            <input name="precoVenda" ng-model="produto.precoVenda" ng-required="true" ng-currency>
+          </md-input-container>
 
-        <md-input-container class="md-block" flex-gt-sm="">
-          <label>Promoção</label><br/>
-          <md-switch ng-model="produto.promocao" aria-label="Switch 1">
-            
-          </md-switch>
-        </md-input-container>
+          <md-input-container class="md-block" flex-gt-sm="">
+            <label>Promoção</label><br/>
+            <md-switch name="promocao" ng-model="produto.promocao" aria-label="Switch 1">
 
-        <lf-ng-md-file-input name="files" lf-files="files" lf-on-file-click="onFileClick" preview drag multiple></lf-ng-md-file-input>
-        <br/>
-        <!-- Colored raised button -->
-        <md-button class="md-primary md-raised" ng-click="salvarProduto($event)">
-          Salvar
-        </md-button>
-      </form>
-    </md-content>
-  </section>
-</div>
+            </md-switch>
+          </md-input-container>
 
-<!-- Angular Material requires Angular.js Libraries -->
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
+          <lf-ng-md-file-input name="files" lf-files="files" lf-on-file-click="onFileClick" preview drag multiple></lf-ng-md-file-input>
+          <br/>
+          <!-- Colored raised button -->
+          <md-button type="submit" class="md-primary md-raised" >
+            Salvar
+          </md-button>
+        </form>
+      </md-content>
+    </section>
+  </div>
 
-<!-- Angular Material Library -->
-<script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
-<script src="js/lf-ng-md-file-input.js"></script>
+  <!-- Angular Material requires Angular.js Libraries -->
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
 
-<script type="text/javascript">
-  angular.module('myApp', ['ngMaterial','lfNgMdFileInput'])
+  <!-- Angular Material Library -->
+  <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
+  <script src="js/lf-ng-md-file-input.js"></script>
+  <script src="js/angular-locale_pt-br.js"></script>  
+  <script src="http://aguirrel.github.io/ng-currency/dist/ng-currency.js"></script>
 
-  .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log) { 
-    $scope.toggleLeft = buildDelayedToggler('left');
-    $scope.tamanhos = [{tam: 'PP'},{tam: 'P'},{tam: 'M'},{tam: 'G'},{tam: 'GG'}];
+  <script type="text/javascript">
+    angular.module('myApp', ['ngMaterial','lfNgMdFileInput','ng-currency'])
+    .config(function($mdThemingProvider) {
+      $mdThemingProvider.theme('default')
+      .primaryPalette('pink')
+      .accentPalette('orange');
+    })
+    .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log,$mdMedia) { 
+      
+      $scope.toggleLeft = buildDelayedToggler('left');
+      $scope.tamanhos = [{tam: 'PP'},{tam: 'P'},{tam: 'M'},{tam: 'G'},{tam: 'GG'}];
 
-    $scope.showAlert = function(ev,message,title = "Alerta") {
+      $scope.showAlert = function(ev,message,title = "Alerta") {
         // Appending dialog to document.body to cover sidenav in docs app
         // Modal dialogs should fully cover application
         // to prevent interaction outside of dialog
@@ -136,42 +148,59 @@
 
       $scope.verificaProdutoExiste = function(){
         $http.post("controller/consultarProduto.php",{cod:$scope.produto.cod, tamanho:$scope.produto.tamanho}).then(function(response)  {
-            if(response.data != "null"){                     
-              $scope.produto = response.data[0];
-            }else{
-              var cod = $scope.produto.cod;
-              var tamanho = $scope.produto.tamanho;
-              $scope.produto = {};
-              $scope.produto.cod = cod;
-              $scope.produto.tamanho = tamanho;
-            }
+          if(response.data != "null"){                     
+            $scope.produto = response.data[0];
+          }else{
+            var cod = $scope.produto.cod;
+            var tamanho = $scope.produto.tamanho;
+            $scope.produto = {};
+            $scope.produto.cod = cod;
+            $scope.produto.tamanho = tamanho;
+          }
            //$scope.srcimg = response.data;
-        });
+         });
       }
       
-      $scope.salvarProduto = function($event) {      
-        var codProduto = "";
+      $scope.carregarProduto = function(ev) {        
+        var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+        $mdDialog.show({
+          controller: DialogController,
+          templateUrl: "dialog/listaProdutos.html",
+          parent: angular.element(document.body),
+           // scope: $scope,
+           targetEvent: ev,
+           clickOutsideToClose:true,
+           fullscreen: useFullScreen,
+           locals: {
+            scope2: $scope
+          }
+        });          
+      };
 
-        //carrega as imagens em um FormData()
-        var formData = new FormData();
-         angular.forEach($scope.files,function(obj){
-          console.log($scope.files);
-          formData.append('files[]', obj.lfFile);
-        });
+      $scope.salvarProduto = function($event) {
+        if($scope.formProduto.$valid){
+          var codProduto = "";
 
-        //salva os dados do produto
-        $http({
-          method : "POST",
-          url : "controller/cadastrarProduto.php",
-          data    : $scope.produto, //forms user object
-          headers : {'Content-Type': 'application/x-www-form-urlencoded'} 
-        }).then(function mySucces(response) {  
-        
+          //carrega as imagens em um FormData()
+          var formData = new FormData();
+          angular.forEach($scope.files,function(obj){
+            console.log($scope.files);
+            formData.append('files[]', obj.lfFile);
+          });
+
+          //salva os dados do produto
+          $http({
+            method : "POST",
+            url : "controller/cadastrarProduto.php",
+            data    : $scope.produto, //forms user object
+            headers : {'Content-Type': 'application/x-www-form-urlencoded'} 
+          }).then(function mySucces(response) {  
+
             if(response.data){
               $scope.showAlert($event,"Salvo com sucesso!");
               codProduto = response.data;
               //envia as imagens para o cadastro de produtos
-              $http.post("constroller/cadastrarProduto.php?codProduto="+codProduto, formData, {
+              $http.post("controller/cadastrarProduto.php?codProduto="+codProduto, formData, {
                 transformRequest: angular.identity,
                 headers: {'Content-Type': undefined}
               })
@@ -183,16 +212,13 @@
             }else{
               $scope.showAlert($event,response.data);
             }          
-        }, 
-        function myError(response) {
-          console.log(response.statusText);
-        });
-
-
-        
-
-          
-        
+          }, 
+          function myError(response) {
+            console.log(response.statusText);
+          });
+        }else{
+          $scope.showAlert($event,"Preencha os campos corretamente!");
+        }
       };     
 
       /**
@@ -226,6 +252,28 @@
         }, 200);
       }  
     })  
-  </script>
-</body>  
-</html>
+
+      //quando montado o dialog
+      function DialogController($scope, $mdDialog, $rootScope, $http,scope2,$mdDialog) {
+        //carrega todos os clientes
+        $http.get("controller/consultarProduto.php").then(function(response)  {           
+         $scope.produtos = response.data;           
+       });
+
+        //busca produto passando id
+        $scope.buscaProduto = function(ev,id) {
+
+          $http.post("controller/consultarProduto.php",{id:id}).then(function(response)  {           
+            //$scope.clientes = response.data;           
+            scope2.produto = response.data[0];              
+            $mdDialog.hide();
+          });
+        };
+
+        $scope.hide = function(){
+          $mdDialog.hide();
+        }
+      }
+    </script>
+  </body>  
+  </html>

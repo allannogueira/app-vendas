@@ -1,12 +1,13 @@
 <?php
-	require_once("class/Conexao.php");
-	require_once("class/Cliente.php");
+	require_once("../class/Conexao.php");
+	require_once("../class/Cliente.php");
 	
 	$_POST = json_decode(file_get_contents('php://input'), true);
 
 	$conexao = new Conexao();
 	$cliente = new Cliente();
 
+	$cliente->setId($_POST['id']);
 	$cliente->setTelefone($_POST['telefone']);
 	$cliente->setEndereco($_POST['endereco']);
 	$cliente->setNumero($_POST['numero']);

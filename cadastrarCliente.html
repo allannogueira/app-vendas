@@ -4,7 +4,14 @@
   <!-- Angular Material style sheet -->
   <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="css/menu.css">  
+  <link rel="stylesheet" href="css/menu.css">
+  <style>
+    md-list.md-dense md-list-item.md-3-line, md-list.md-dense md-list-item.md-3-line>._md-no-style {
+      min-height: 85px;
+      height: 85px;
+    }
+
+  </style>
 </head>
 <body ng-app="myApp">
   <div layout="column" ng-cloak style="height: 100%" ng-controller="AppCtrl">
@@ -17,97 +24,106 @@
           <span>APP VENDAS</span>
         </h2>
         <span flex></span>
+        <md-button ng-click="cliente = {}" class="md-primary md-raised">Cadastrar Novo</md-button>
+        <md-button ng-click="carregarCliente($event)" class="md-primary md-raised">Carregar Cliente</md-button>
       </div>
     </md-toolbar>
     <section layout="row" flex> 
-      <div layout="column" style="height:100%;" ng-cloak>
+      <div layout="column"  ng-cloak>
         <section layout="row" flex>
-          <md-sidenav 
-          class="md-sidenav-left"
-          md-component-id="left"
-          md-is-locked-open="$mdMedia('gt-md')"
-          md-disable-backdrop
-          md-whiteframe="4"
-          style="top: 50px">
-          <md-toolbar class="md-theme-indigo">
-            <h1 class="md-toolbar-tools">Menu</h1>
-          </md-toolbar>    
-          <div class="mdl-layout__drawer" ng-include="'menu.html'"></div>
-        </md-sidenav>   
-      </section>
-    </div>
-    <md-content flex layout-padding>
-      <h1>Cadastrar Cliente</h1>               
-      <form action="#"  novalidate>
-        <md-input-container class="md-block" flex-gt-sm="">
-          <label>Nome</label>
-          <input ng-model="cliente.nome" ng-required="true">
-        </md-input-container>
+          <md-sidenav class="md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" md-disable-backdrop md-whiteframe="4" style="top: 57px">
+            <md-toolbar class="md-theme-indigo">
+              <div class="circle">
+                Marcy<br/>
+                Lingerie
+              </div>
+            </md-toolbar> 
+            <div class="mdl-layout__drawer" ng-include="'menu.html'"></div>
+          </md-sidenav>   
+        </section>
+      </div>
 
-        <md-input-container class="md-block" flex-gt-sm="">
-          <label>CPF</label>
-          <input ng-model="cliente.cpf">
-        </md-input-container>
+      <md-content flex layout-padding>
 
-        <md-input-container class="md-block" flex-gt-sm="">
-          <label>Telefone</label>
-          <input ng-model="cliente.telefone" ng-required="true">
-        </md-input-container>
+        <h1>Cadastrar Cliente</h1>               
+        <form ng-submit="salvarCliente($event)" name="formCliente" novalidate>
+          <input type="hidden" ng-model="cliente.id"/>
+          <md-input-container class="md-block" flex-gt-sm="">
+            <label>Nome</label>
+            <input name="nome" ng-model="cliente.nome" ng-required="true">
+          </md-input-container>
 
-        <md-input-container class="md-block" flex-gt-sm="">
-          <label>Endereço</label>
-          <input ng-model="cliente.endereco">
-        </md-input-container>
+          <md-input-container class="md-block" flex-gt-sm="">
+            <label>CPF</label>
+            <input name="cpf" ng-model="cliente.cpf">
+          </md-input-container>
 
-        <md-input-container class="md-block" flex-gt-sm="">
-          <label>Numero</label>
-          <input ng-model="cliente.numero">
-        </md-input-container>
+          <md-input-container class="md-block" flex-gt-sm="">
+            <label>Telefone</label>
+            <input name="telefone" ng-model="cliente.telefone" ng-required="true">
+          </md-input-container>
 
-        <md-input-container class="md-block" flex-gt-sm="">
-          <label>Bairro</label>
-          <input ng-model="cliente.bairro">
-        </md-input-container>
+          <md-input-container class="md-block" flex-gt-sm="">
+            <label>Endereço</label>
+            <input name="endereco" ng-model="cliente.endereco">
+          </md-input-container>
 
-        <md-input-container class="md-block" flex-gt-sm="">
-          <label>Estado</label>
-          <input ng-model="cliente.estado">
-        </md-input-container>
+          <md-input-container class="md-block" flex-gt-sm="">
+            <label>Numero</label>
+            <input name="numero" ng-model="cliente.numero">
+          </md-input-container>
 
-        <md-input-container class="md-block" flex-gt-sm="">
-          <label>Cidade</label>
-          <input ng-model="cliente.cidade">
-        </md-input-container>
-        <br/>
+          <md-input-container class="md-block" flex-gt-sm="">
+            <label>Bairro</label>
+            <input name="bairro" ng-model="cliente.bairro">
+          </md-input-container>
 
-        <md-input-container class="md-block" flex-gt-sm="">
-          <label>Credito</label>
-          <input ng-model="cliente.credito">
-        </md-input-container>
-        <br/>
-        <!-- Colored raised button -->
-        <md-button class="md-primary md-raised" ng-click="salvarCliente($event)">
-          Salvar
-        </md-button>
-      </form>
-    </md-content>
-  </section>
-</div>
+          <md-input-container class="md-block" flex-gt-sm="">
+            <label>Estado</label>
+            <input name="estado" ng-model="cliente.estado">
+          </md-input-container>
 
-<!-- Angular Material requires Angular.js Libraries -->
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
-<!-- Angular Material Library -->
-<script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
+          <md-input-container class="md-block" flex-gt-sm="">
+            <label>Cidade</label>
+            <input name="cidade" ng-model="cliente.cidade">
+          </md-input-container>
+          <br/>
 
-<script type="text/javascript">
-  angular.module('myApp', ['ngMaterial'])
+          <md-input-container class="md-block" flex-gt-sm="">
+            <label>Credito</label>
+            <input name="credito" ng-model="cliente.credito" ng-currency>
+          </md-input-container>
+          <br/>
+          <!-- Colored raised button -->
+          <md-button type="submit" class="md-primary md-raised">
+            Salvar
+          </md-button>
+        </form>
+      </md-content>
+    </section>
+  </div>
 
-  .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log) { 
-    $scope.toggleLeft = buildDelayedToggler('left');
-    $scope.showAlert = function(ev,message,title = "Alerta") {
+  <!-- Angular Material requires Angular.js Libraries -->
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
+  <!-- Angular Material Library -->
+  <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
+  <script src="js/toArrayFilter.js"></script>  
+  <script src="js/angular-locale_pt-br.js"></script>
+  <script src="http://aguirrel.github.io/ng-currency/dist/ng-currency.js"></script>
+
+  <script type="text/javascript">
+    angular.module('myApp', ['ngMaterial','ng-currency','angular-toArrayFilter'])
+    .config(function($mdThemingProvider) {
+      $mdThemingProvider.theme('default')
+      .primaryPalette('pink')
+      .accentPalette('orange');
+    })
+    .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log,$mdMedia) { 
+      $scope.toggleLeft = buildDelayedToggler('left');
+      $scope.showAlert = function(ev,message,title = "Alerta") {
         // Appending dialog to document.body to cover sidenav in docs app
         // Modal dialogs should fully cover application
         // to prevent interaction outside of dialog
@@ -123,24 +139,44 @@
           );
       }
 
+      $scope.carregarCliente = function(ev) {        
+        var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+        $mdDialog.show({
+          controller: DialogController,
+          templateUrl: "dialog/listaClientes.html",
+          parent: angular.element(document.body),
+           // scope: $scope,
+           targetEvent: ev,
+           clickOutsideToClose:true,
+           fullscreen: useFullScreen,
+           locals: {
+            scope2: $scope
+          }
+        });          
+      };
+
       $scope.salvarCliente = function($event) {
-        $http({
-          method : "POST",
-          url : "controller/cadastrarCliente.php",
-          data    : $scope.cliente, //forms user object
-          headers : {'Content-Type': 'application/x-www-form-urlencoded'} 
-        }).then(function mySucces(response) {
-          
-            if(response.data){
+        if($scope.formCliente.$valid){
+          $http({
+            method : "POST",
+            url : "controller/cadastrarCliente.php",
+            data    : $scope.cliente, //forms user object
+            headers : {'Content-Type': 'application/x-www-form-urlencoded'} 
+          }).then(function mySucces(response) {
+
+            if(response.data == 1){
               $scope.showAlert($event,"Salvo com sucesso!");
             }else{
               $scope.showAlert($event,"Desculpe, não foi possível salvar!");
             }
-          
-        }, 
-        function myError(response) {
-          console.log(response.statusText);
-        });
+
+          }, 
+          function myError(response) {
+            console.log(response.statusText);
+          });
+        }else{
+          $scope.showAlert($event,"Preencha os campos corretamente!");
+        }
       };     
 
       /**
@@ -174,6 +210,29 @@
         }, 200);
       }  
     })  
-  </script>
-</body>  
-</html>
+
+      //quando montado o dialog
+      function DialogController($scope, $mdDialog, $rootScope, $http,scope2) {        
+         
+        //carrega todos os clientes
+        $http.get("controller/consultarCliente.php").then(function(response)  {                     
+           $scope.clientes = response.data;           
+        });
+
+        //busca cliente
+        $scope.buscaCliente = function(ev,id) {
+          $http.post("controller/consultarCliente.php",{id:id}).then(function(response)  {           
+            //$scope.clientes = response.data;           
+              scope2.cliente = response.data[0];
+             $mdDialog.hide();
+          });
+          
+        };
+
+        $scope.hide = function(){
+          $mdDialog.hide();
+        }
+      }
+    </script>
+  </body>  
+  </html>

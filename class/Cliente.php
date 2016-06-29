@@ -1,5 +1,6 @@
 <?php
 class Cliente{
+    private $id;
 	private $nome;
 	private $endereco;
 	private $numero;
@@ -10,6 +11,30 @@ class Cliente{
 	private $telefone;
     private $credito;
 
+
+    /**
+     * Gets the value of id.
+     *
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Sets the value of id.
+     *
+     * @param mixed $id the id
+     *
+     * @return self
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
 
     /**
      * Gets the value of nome.
@@ -228,31 +253,73 @@ class Cliente{
     }
 
     public function salvar($conexao){
-    	$sql = "INSERT INTO ddc_app_vendas.cliente (
-		    		telefone
-				  	,endereco
-				  	,numero
-				  	,bairro
-				  	,estado
-				  	,cidade
-				  	,nome
-				  	,cpf	
-                    ,credito
-		    	)
-		    	VALUES(
-		    		'".$this->telefone."'
-		    		,'".$this->endereco."'
-		    		,'".$this->numero."'
-		    		,'".$this->bairro."'
-		    		,'".$this->estado."'
-		    		,'".$this->cidade."'
-		    		,'".$this->nome."'
-		    		,'".$this->cpf."'
-                    ,'".$this->credito."'
-		    	)
-    	";    	
+        if($this->id == ""){
+        	$sql = "INSERT INTO ddc_app_vendas.cliente (
+    		    		telefone
+    				  	,endereco
+    				  	,numero
+    				  	,bairro
+    				  	,estado
+    				  	,cidade
+    				  	,nome
+    				  	,cpf	
+                        ,credito
+    		    	)
+    		    	VALUES(
+    		    		'".$this->telefone."'
+    		    		,'".$this->endereco."'
+    		    		,'".$this->numero."'
+    		    		,'".$this->bairro."'
+    		    		,'".$this->estado."'
+    		    		,'".$this->cidade."'
+    		    		,'".$this->nome."'
+    		    		,'".$this->cpf."'
+                        ,'".$this->credito."'
+    		    	)
+        	";    	
+        }else{
+            $sql = "UPDATE 
+                        ddc_app_vendas.cliente 
+                    SET
+                        telefone    = '".$this->telefone."'
+                        ,endereco   = '".$this->endereco."'
+                        ,numero     = '".$this->numero."'
+                        ,bairro     = '".$this->bairro."'
+                        ,estado     = '".$this->estado."'
+                        ,cidade     = '".$this->cidade."'
+                        ,nome       = '".$this->nome."'
+                        ,cpf        = '".$this->cpf."'
+                        ,credito    = '".$this->credito."'
+                    WHERE
+                        id = '".$this->id."'                    
+            ";      
+        }
     	$result = mysqli_query($conexao,$sql);
     	return $result;
+    }
+
+    public function listar($conexao,$id = ""){
+        if($id != ""){
+            $where = " where id = ".$id;
+        }
+
+        $sql = "SELECT * FROM ddc_app_vendas.cliente $where";
+        $result = mysqli_query($conexao,$sql);
+        while($row = mysqli_fetch_array($result)){
+            $retorno[] = array(
+                "id"=>$row["id"]
+                ,"nome"=>$row["nome"]
+                ,"endereco"=>$row["endereco"]
+                ,"numero"=>$row["numero"]
+                ,"bairro"=>$row["bairro"]
+                ,"cidade"=>$row["cidade"]
+                ,"estado"=>$row["estado"]
+                ,"cpf"=>$row["cpf"]
+                ,"telefone"=>$row["telefone"]
+                ,"credito"=>$row["credito"]
+            );    
+        }
+        return json_encode($retorno);
     }
 }
 

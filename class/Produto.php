@@ -230,9 +230,7 @@ class Produto{
 
 
     public function salvar($conexao){
-        if($this->getCod() == "")
-            return "Por favor, preencha o código do produto.";
-
+        
         if($this->id == ""){
             $sql = "INSERT INTO ddc_app_vendas.produto (
             cod
@@ -242,7 +240,6 @@ class Produto{
             ,estoque       
             ,promocao
             ,tamanho
-            ,reserva
             )
             VALUES(
             '".$this->cod."'
@@ -251,8 +248,7 @@ class Produto{
             ,'".$this->precoVenda."'
             ,'".$this->estoque."'
             ,'".$this->promocao."'
-            ,'".$this->tamanho."'
-            ,'".$this->reserva."'
+            ,'".$this->tamanho."'            
             )
             ";      
             $result = mysqli_query($conexao,$sql);
@@ -262,8 +258,9 @@ class Produto{
                 $this->setId($id);
                 return $id;
             }
-        }else{
-            $result = $this->atualizar($conexao);
+        }else{            
+            $this->atualizar($conexao);
+            $result = $this->id;
         }
         return $result;
     }
@@ -277,12 +274,11 @@ class Produto{
         ,preco_venda = '".$this->precoVenda."'
         ,estoque = '".$this->estoque."'  
         ,promocao = '".$this->promocao."'
-        ,tamanho = '".$this->tamanho."'
-        ,reserva = '".$this->reserva."'
+        ,tamanho = '".$this->tamanho."'        
         WHERE
             id = '".$this->id."'
-
         ";      
+        //return $sql;
         return mysqli_query($conexao,$sql);
     }
 

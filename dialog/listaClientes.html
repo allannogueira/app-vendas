@@ -1,0 +1,37 @@
+
+<md-dialog aria-label=""  ng-cloak style="width: 100%">
+  <form>
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Clientes</h2>
+        <span flex></span>
+      </div>
+    </md-toolbar>
+    <md-dialog-content>
+      <div class="md-dialog-content">
+       <div flex>
+           <md-input-container class="md-block" flex-gt-sm="">
+            <label>Nome do Cliente</label>
+            <input name="nome" ng-model="pesquisaCliente">
+          </md-input-container>
+
+          <md-list ng-cloak >
+            <!-- md-subheader class="md-no-sticky">3 line item (with hover)</md-subheader-->
+            <md-list-item ng-repeat="cliente in clientes | toArray : false | filter: pesquisaCliente" ng-click="buscaCliente($event,cliente.id)" class="noright" style="height: 48px">
+              <!--img alt="{{ person.name }}" ng-src="{{ person.img }}" class="md-avatar" /-->
+              <p>{{ cliente.nome }}</p>
+              <!--md-checkbox class="md-secondary" ng-model="person.selected"></md-checkbox>
+              <md-icon md-svg-icon="communication:email"  ng-click="doSecondaryAction($event)" aria-label="Send Email" class="md-secondary md-hue-3" ></md-icon>
+              <md-icon class="md-secondary" ng-click="doSecondaryAction($event)" aria-label="Chat" md-svg-icon="communication:message"></md-icon-->
+            </md-list-item>
+          </md-list>                                            
+      </div>
+    </div>
+  </md-dialog-content>
+  <md-dialog-actions layout="row">
+    <md-button ng-click="hide();">
+      OK
+    </md-button>
+  </md-dialog-actions>
+</form>
+</md-dialog>
