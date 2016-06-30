@@ -6,8 +6,8 @@ $_POST = file_get_contents('php://input');
 
 $conexao = new Conexao();  
 
-  //envia as imagens do produto
-if(isset($_GET['codProduto'])){
+    //envia as imagens do produto
+if(isset($_GET['codProduto'])) {
   require_once("../class/ProdutosImagens.php");
   $imagens = new ProdutosImagens();
   $imagens->setProduto($_GET['codProduto']);
@@ -16,18 +16,18 @@ if(isset($_GET['codProduto'])){
   $name = $_FILES['files']['name'];
   $tam = sizeof($path);
 
-  for($i = 0;$i < $tam; $i++)
-  {        
+  for($i = 0;$i < $tam; $i++) {        
     $type = pathinfo($name[$i], PATHINFO_EXTENSION);
     $getContents = file_get_contents($path[$i]);
-    
+
     $imgBase64 = 'data:image/' . $type . ';base64, ' . base64_encode($getContents);   
 
     $imagens->setImagem($imgBase64);
     $imagens->salvar($conexao->connect());      
   }
+
   }else{//cadastra ou altera o produto    
-    
+
     $_POST = json_decode($_POST,true);
 
     $produto = new Produto();
@@ -42,4 +42,4 @@ if(isset($_GET['codProduto'])){
     $produto->setReserva($_POST['reserva']);
     echo $produto->salvar($conexao->connect());   
   }
-  ?>
+?>

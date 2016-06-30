@@ -41,12 +41,18 @@
         </section>
       </div>
     <md-content flex layout-padding>     
-      <div class="" ng-repeat="produto in produtos">
+
+      <div class="" ng-repeat="produto in produtos track by $index">        
+ 
+       <!--h2 class="" ng-show="produto.cod != produtos[$index-1].cod">{{ produto.cod }}</h2-->
        <h2 class="">{{ produto.cod }}</h2>
-          {{ produto.nome }}
-          {{ produto.precoVenda }}
+          <div>
+            {{ produto.nome }}
+            {{ produto.precoVenda }}
+          </div>
           <br/>
-          <img width="150" src={{produto.imagem}} />
+          <img width="100%" src={{produto.imagem}} />
+    
      </div>
     </md-content>
   </section>
@@ -64,7 +70,11 @@
 
 <script type="text/javascript">
   angular.module('myApp', ['ngMaterial','lfNgMdFileInput'])
-
+.config(function($mdThemingProvider) {
+      $mdThemingProvider.theme('default')
+      .primaryPalette('pink')
+      .accentPalette('orange');
+    })
   .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log) { 
     $scope.toggleLeft = buildDelayedToggler('left');
     $scope.showAlert = function(ev,message,title = "Alerta") {
@@ -88,17 +98,18 @@
       });
       
       $scope.consultarProduto = function($event) {
-        var codProduto = "";
-        $scope.produtos = "";
+        //var codProduto = "";
+        $scope.aux = 0;
+        $scope.produtos = [];
         //carrega as imagens em um FormData()
-        var formData = new FormData();
+        /*var formData = new FormData();
          angular.forEach($scope.files,function(obj){
           console.log($scope.files);
           formData.append('files[]', obj.lfFile);
         });
-        
-        $http.get("controller/consultarProduto.php").then(function(response)  {
-           console.log(response);
+        */
+        $http.post("controller/consultarProduto.php",{id: -1}).then(function(response)  {
+           console.log(response.data);
            $scope.produtos = response.data;
            //$scope.srcimg = response.data;
         });

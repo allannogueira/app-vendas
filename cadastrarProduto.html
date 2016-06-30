@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="css/lf-ng-md-file-input.css">  
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="css/menu.css">
+  <link rel="stylesheet" href="css/ngProgress.css">
   <style>
     md-list.md-dense md-list-item.md-3-line, md-list.md-dense md-list-item.md-3-line>._md-no-style {
       min-height: 85px;
@@ -109,16 +110,19 @@
   <script src="js/lf-ng-md-file-input.js"></script>
   <script src="js/angular-locale_pt-br.js"></script>  
   <script src="http://aguirrel.github.io/ng-currency/dist/ng-currency.js"></script>
-
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+  <script src="js/ngProgress.min.js"></script>
   <script type="text/javascript">
-    angular.module('myApp', ['ngMaterial','lfNgMdFileInput','ng-currency'])
+    angular.module('myApp', ['ngMaterial','ngProgress','lfNgMdFileInput','ng-currency'])
     .config(function($mdThemingProvider) {
       $mdThemingProvider.theme('default')
       .primaryPalette('pink')
       .accentPalette('orange');
     })
-    .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log,$mdMedia) { 
-      
+
+    .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log,$mdMedia,ngProgressFactory) { 
+        $scope.progressbar = ngProgressFactory.createInstance();
+
       $scope.toggleLeft = buildDelayedToggler('left');
       $scope.tamanhos = [{tam: 'PP'},{tam: 'P'},{tam: 'M'},{tam: 'G'},{tam: 'GG'}];
 
@@ -161,7 +165,10 @@
          });
       }
       
-      $scope.carregarProduto = function(ev) {        
+      $scope.carregarProduto = function(ev) {       
+      
+        $scope.progressbar.start();
+             
         var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
         $mdDialog.show({
           controller: DialogController,
@@ -174,11 +181,14 @@
            locals: {
             scope2: $scope
           }
-        });          
+        });                  
       };
+      
 
       $scope.salvarProduto = function($event) {
+        
         if($scope.formProduto.$valid){
+           $scope.progressbar.start();
           var codProduto = "";
 
           //carrega as imagens em um FormData()
@@ -188,6 +198,7 @@
             formData.append('files[]', obj.lfFile);
           });
 
+          
           //salva os dados do produto
           $http({
             method : "POST",
@@ -211,14 +222,18 @@
               
             }else{
               $scope.showAlert($event,response.data);
-            }          
+            } 
+
+             $scope.progressbar.complete();         
           }, 
           function myError(response) {
             console.log(response.statusText);
+             $scope.progressbar.complete();
           });
         }else{
           $scope.showAlert($event,"Preencha os campos corretamente!");
         }
+
       };     
 
       /**
@@ -257,23 +272,47 @@
       function DialogController($scope, $mdDialog, $rootScope, $http,scope2,$mdDialog) {
         //carrega todos os clientes
         $http.get("controller/consultarProduto.php").then(function(response)  {           
-         $scope.produtos = response.data;           
-       });
+          $scope.produtos = response.data;     
+           scope2.progressbar.complete();      
+        });
 
+        $scope.excluirImagem = function(id){
+          alert(id);
+        }
         //busca produto passando id
         $scope.buscaProduto = function(ev,id) {
-
-          $http.post("controller/consultarProduto.php",{id:id}).then(function(response)  {           
-            //$scope.clientes = response.data;           
-            scope2.produto = response.data[0];              
-            $mdDialog.hide();
-          });
-        };
-
-        $scope.hide = function(){
+           scope2.progressbar.start();
           $mdDialog.hide();
+
+          $http.post("controller/consultarProduto.php",{id:id}).then(function(response)  {
+            //$scope.clientes = response.data;           
+            scope2.produto = response.data[0];
+
+            $(".lf-ng-md-file-input-preview-container").append("<div class='imagens' style='width: 100%; position: relative;'></div>");
+            angular.forEach(response.data,function(obj){ 
+
+              if(obj.idImagem != null){
+                $(".lf-ng-md-file-input-preview-container .imagens").append("<img id='img"+obj.idImagem+"'  onclick=\"excluirImagem('"+obj.idImagem+"')\" style='display: inline-block; float: left; margin: 10px; box-shadow: 5px 5px 5px #CCC' height='160' width='160' src='"+obj.imagem+"' /> ");
+                }
+            });
+               scope2.progressbar.complete();
+            });
+          };
+
+          $scope.hide = function(){
+            $mdDialog.hide();
+          }
         }
-      }
-    </script>
-  </body>  
-  </html>
+
+        function  excluirImagem(idImagem) {
+          retorno = confirm("Tem certeza que deseja excluir essa imagem?");
+
+          if(retorno){
+            $.post( "controller/excluirImagem.php", {idImagem: idImagem}, function( data ) {
+              $("#img"+idImagem).remove();
+            });
+          }          
+        }
+      </script>
+    </body>  
+    </html>

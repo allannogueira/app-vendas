@@ -220,12 +220,12 @@
         if($scope.formVenda.$valid)
         {
           var objVenda = {cliente: $scope.venda.cliente, valorBonus: $scope.venda.valorBonus, reserva: $scope.venda.reserva, valorPago: $scope.venda.valorPago || 0, produtos: angular.copy($scope.produtosVenda)};
-
+          console.log(objVenda);
           angular.forEach(objVenda.produtos,function(obj) {
             //verifico se ja existe o produto com mesmo tamanho e codigo
             delete obj.imagem;
             delete obj.nome;
-            delete obj.precoVenda;
+            //delete obj.precoVenda;
             delete obj.tamanho;
             delete obj.cod;          
           });     
@@ -237,7 +237,11 @@
             headers : {'Content-Type': 'application/x-www-form-urlencoded'} 
           }).then(function mySucces(response) {
 
-            if(response.data == 1){              
+            if(response.data == 1){     
+              //reseta venda
+              $scope.venda = [{valorTotal: 0}];
+              $scope.produtosVenda = [];
+              //mensagem para usuario
               $scope.showAlert($event,"Venda realizada com sucesso!");
             }else{
               $scope.showAlert($event,"Desculpe, não foi possível salvar!");
@@ -287,7 +291,8 @@
             $scope.produtosVenda = $scope.produtosVenda.concat([angular.copy($scope.produtos[index])]);//copia o objeto de $scope.produtos para scope.produtosVenda
             $scope.venda.valorTotal += (parseFloat($scope.produtos[index].precoVenda) || 0 * $scope.venda.qtdProduto );
           }
-        }        
+        }     
+
       }    
 
 
@@ -328,11 +333,16 @@
   function DialogController($scope, $mdDialog, $rootScope,scope2) {
     $scope.enviar = function(ev) {
       scope2.venda.valorPago = $scope.venda.valorPago;
-          scope2.vender(ev);//.vender(ev);
-          $mdDialog.hide();
-
-        };
+      console.log(scope2.venda.valorPago)
+      console.log(scope2.venda.valorTotal)
+      console.log(scope2.venda.valorPago > scope2.venda.valorTotal)
+      if(scope2.venda.valorPago > scope2.venda.valorTotal){//calcula bonus
+        scope2.venda.valorBonus = scope2.venda.valorPago - scope2.venda.valorTotal;
       }
-    </script>
-  </body>  
-  </html>
+      scope2.vender(ev);//.vender(ev);
+      $mdDialog.hide();
+    };
+  }
+</script>
+</body>  
+</html>

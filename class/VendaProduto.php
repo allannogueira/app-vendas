@@ -4,6 +4,7 @@ class VendaProduto{
     public $produtoId;
     public $vendaId;
     public $qtdProduto;
+    public $precoVenda;
     
     /**
      * Gets the value of produtoId.
@@ -77,16 +78,42 @@ class VendaProduto{
         return $this;
     }
 
+      /**
+     * Gets the value of qtdProduto.
+     *
+     * @return mixed
+     */
+    public function getPrecoVenda()
+    {
+        return $this->precoVenda;
+    }
+
+    /**
+     * Sets the value of qtdProduto.
+     *
+     * @param mixed $qtdProduto the qtd produto
+     *
+     * @return self
+     */
+    public function setPrecoVenda($precoVenda)
+    {
+        $this->precoVenda = $precoVenda;
+
+        return $this;
+    }
+
      public function salvar($conexao){
         $sql = "INSERT INTO ddc_app_vendas.produto_venda (
                     produto_id
                     ,venda_id
                     ,qtd_produto
+                    ,preco_venda
                 )
                 VALUES(
                     '".$this->produtoId."'
                     ,'".$this->vendaId."'
                     ,'".$this->qtdProduto."'
+                    ,'".$this->precoVenda."'
                 )
         ";        
         $result = mysqli_query($conexao,$sql);

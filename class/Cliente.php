@@ -11,7 +11,6 @@ class Cliente{
 	private $telefone;
     private $credito;
 
-
     /**
      * Gets the value of id.
      *
@@ -250,6 +249,20 @@ class Cliente{
         $this->credito = $credito;
 
         return $this;
+    }
+
+
+    public function salvarCredito($conexao){
+
+         $sql = "UPDATE 
+                    ddc_app_vendas.cliente 
+                SET
+                    credito = credito + '".$this->credito."'
+                WHERE
+                    id = '".$this->id."'                    
+            ";    
+        $result = mysqli_query($conexao,$sql);
+        return $result;
     }
 
     public function salvar($conexao){

@@ -67,6 +67,13 @@ class ProdutosImagens{
         
         $result = mysqli_query($conexao,$sql);
     }
+
+    public function excluirImagem($conexao, $idImagem){
+        $sql = "delete from ddc_app_vendas.produto_imagens where id = '".$idImagem."'";
+         $result = mysqli_query($conexao,$sql);
+         return $result;
+
+    }
 }
 
 ?>
