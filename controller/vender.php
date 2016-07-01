@@ -40,12 +40,11 @@
             $vendaProduto->setPrecoVenda($produto["precoVenda"]);
     		$vendaProduto->setProdutoId($produto["id"]);
     		$vendaProduto->setQtdProduto($produto["qtd"]);//quantidade do produto que esta sendo vendido
-    		$vendaProduto->salvar($conexao->connect());
+    		echo $vendaProduto->salvar($conexao->connect());exit;
     	}
 
         //salva o valor do bonus no cadastro do cliente
         if($valorBonus > 0){
-
             $objCliente = new Cliente();
             $objCliente->setId($cliente);            
             $objCliente->setCredito($valorBonus);

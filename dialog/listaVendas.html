@@ -1,0 +1,41 @@
+
+<md-dialog aria-label=""  ng-cloak style="width: 100%">
+  <form>
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Consultar Vendas ou Pedidos Realizados</h2>
+        <span flex></span>
+      </div>
+    </md-toolbar>
+    <md-dialog-content>
+      <div class="md-dialog-content">
+       <div flex>
+          <md-input-container class="md-block">
+            <md-icon class="material-icons">person</md-icon>
+            <label>Cliente</label>
+            <md-select name="cliente" placeholder="Cliente" ng-model="cliente" ng-required="true" ng-change="getVendas()">
+              <md-option ng-value="cliente.id" ng-repeat="cliente in clientes track by $index"> &nbsp; {{cliente.nome}}</md-option>
+            </md-select>
+          </md-input-container>  
+<!--
+          <md-list ng-cloak >
+            <!-- md-subheader class="md-no-sticky">3 line item (with hover)</md-subheader-->
+    <!--        <md-list-item ng-repeat="produto in produtos | filter: pesquisaProduto" ng-click="buscaProduto($event,produto.id)" class="noright" style="height: 48px">
+              <!--img alt="{{ person.name }}" ng-src="{{ person.img }}" class="md-avatar" /-->
+        <!--      <p>{{ produto.nome }}</p>
+              <!--md-checkbox class="md-secondary" ng-model="person.selected"></md-checkbox>
+              <md-icon md-svg-icon="communication:email"  ng-click="doSecondaryAction($event)" aria-label="Send Email" class="md-secondary md-hue-3" ></md-icon>
+              <md-icon class="md-secondary" ng-click="doSecondaryAction($event)" aria-label="Chat" md-svg-icon="communication:message"></md-icon-->
+            <!--</md-list-item>
+          </md-list>                                  
+-->
+      </div>
+    </div>
+  </md-dialog-content>
+  <md-dialog-actions layout="row">
+    <md-button ng-click="hide();">
+      OK
+    </md-button>
+  </md-dialog-actions>
+</form>
+</md-dialog>

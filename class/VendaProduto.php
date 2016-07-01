@@ -115,8 +115,11 @@ class VendaProduto{
                     ,'".$this->qtdProduto."'
                     ,'".$this->precoVenda."'
                 )
-        ";        
+        ";     
+
+         $sql2 = "UPDATE ddc_app_vendas.produto set estoque = estoque - ".$this->qtdProduto." where id='".$this->produtoId."'";
         $result = mysqli_query($conexao,$sql);
+        $result = mysqli_query($conexao,$sql2);
         return $result;
     }
 }

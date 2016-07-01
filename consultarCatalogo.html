@@ -1,6 +1,11 @@
 <html lang="en" >
 <head>
+  <meta http-equiv="Content-Type" content="text/html" charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="resource-type" content="document" />
+
+  
   <!-- Angular Material style sheet -->
   <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
   <link rel="stylesheet" href="css/lf-ng-md-file-input.css">  
@@ -10,6 +15,10 @@
     md-list.md-dense md-list-item.md-3-line, md-list.md-dense md-list-item.md-3-line>._md-no-style {
       min-height: 85px;
       height: 85px;
+    }
+
+    .galleria{
+      height: 300px;
     }
   </style>
 </head>
@@ -24,6 +33,7 @@
           <span>APP VENDAS</span>
         </h2>
         <span flex></span>
+        <a href='whatsapp://send?text=StackOverflow'><i class="material-icons">share</i></a>
       </div>
     </md-toolbar>
     <section layout="row" flex> 
@@ -40,44 +50,66 @@
           </md-sidenav>   
         </section>
       </div>
-    <md-content flex layout-padding>     
+      <md-content flex layout-padding>     
 
-      <div class="" ng-repeat="produto in produtos track by $index">        
- 
-       <!--h2 class="" ng-show="produto.cod != produtos[$index-1].cod">{{ produto.cod }}</h2-->
-       <h2 class="">{{ produto.cod }}</h2>
-          <div>
-            {{ produto.nome }}
-            {{ produto.precoVenda }}
+
+        <div  ng-repeat="produto in produtos track by $index" my-repeat-directive>                
+
+          <div ng-if="produto.cod != produtos[$index-1].cod">
+            <h2 style="align: text-center">
+              {{ produto.nome }} - <strong style="color: green">{{ produto.precoVenda | currency}}</strong>                    
+            </h2>
+
+            <p>
+               Código: {{ produto.cod }}<br/>
+               Estoque: {{ produto.estoque > 0 ? produto.estoque + " itens.": "Produto Indisponivel." }}<br/>
+              
+            </p>
+            <div class="galleria">
+            
+              <img ng-repeat="x in produtos track by $index" style="display:inline-block" ng-if="produto.cod == x.cod" width="150" src={{x.imagem}} />
+            
+            </div>
           </div>
-          <br/>
-          <img width="100%" src={{produto.imagem}} />
+        </div>
+
+      </md-content>
+    </section>
+  </div>
+
+  <!-- Angular Material requires Angular.js Libraries -->
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
+
+  <!-- Angular Material Library -->
+  <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
+  <script src="js/lf-ng-md-file-input.js"></script>
+  <script src="js/angular-locale_pt-br.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+  <script src="galleria/galleria-1.4.2.min.js"></script>
+
+  <script type="text/javascript">
+
     
-     </div>
-    </md-content>
-  </section>
-</div>
-
-<!-- Angular Material requires Angular.js Libraries -->
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
-
-<!-- Angular Material Library -->
-<script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
-<script src="js/lf-ng-md-file-input.js"></script>
-
-<script type="text/javascript">
-  angular.module('myApp', ['ngMaterial','lfNgMdFileInput'])
-.config(function($mdThemingProvider) {
+    angular.module('myApp', ['ngMaterial','lfNgMdFileInput'])
+    .config(function($mdThemingProvider) {
       $mdThemingProvider.theme('default')
       .primaryPalette('pink')
       .accentPalette('orange');
     })
-  .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log) { 
-    $scope.toggleLeft = buildDelayedToggler('left');
-    $scope.showAlert = function(ev,message,title = "Alerta") {
+    .directive('myRepeatDirective', function() {
+      return function(scope, element, attrs) {        
+        if (scope.$last){
+          Galleria.loadTheme('galleria/themes/classic/galleria.classic.min.js');
+              Galleria.run('.galleria');
+        }
+      };
+    })
+    .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log) { 
+      $scope.toggleLeft = buildDelayedToggler('left');
+      $scope.showAlert = function(ev,message,title = "Alerta") {
         // Appending dialog to document.body to cover sidenav in docs app
         // Modal dialogs should fully cover application
         // to prevent interaction outside of dialog
@@ -109,12 +141,12 @@
         });
         */
         $http.post("controller/consultarProduto.php",{id: -1}).then(function(response)  {
-           console.log(response.data);
-           $scope.produtos = response.data;
+         console.log(response.data);
+         $scope.produtos = response.data;
            //$scope.srcimg = response.data;
-        });
+         });
       }
-       $scope.consultarProduto(); 
+      $scope.consultarProduto(); 
 
       /**
       * Supplies a function that will continue to operate until the
@@ -147,6 +179,7 @@
         }, 200);
       }  
     })  
+
   </script>
 </body>  
 </html>

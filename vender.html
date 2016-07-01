@@ -23,6 +23,8 @@
           <span>APP VENDAS</span>
         </h2>
         <span flex></span>
+        <md-button ng-click="resetaVenda()" class="md-primary md-raised">Nova Venda</md-button>
+        <md-button ng-click="carregarVenda($event)" class="md-primary md-raised">Carregar Venda</md-button>
       </div>
     </md-toolbar>
 
@@ -47,13 +49,12 @@
           <form ng-submit="showAdvanced($event)" name="formVenda"  novalidate>
             <md-card md-theme="{{ showDarkTheme ? 'dark-grey' : 'default' }}" md-theme-watch>
               <md-card-content  layout-align="space-between">
-
                 <div layout="row">
                   <div flex>
                     <md-input-container class="md-block">
                       <md-icon class="material-icons">person</md-icon>
                       <label>Cliente</label>
-                      <md-select name="cliente" placeholder="Cliente" ng-model="venda.cliente" ng-required="true" md-on-open="carregarClientes()">
+                      <md-select name="cliente" placeholder="Cliente" ng-model="venda.cliente" ng-required="true" md-on-open="getClientes()">
                         <md-option ng-value="cliente.id" ng-repeat="cliente in clientes track by $index"> &nbsp; {{cliente.nome}}</md-option>
                       </md-select>
                     </md-input-container>      
@@ -61,12 +62,17 @@
                 </div>
 
                 <div layout="row">
-                  <div flex="80">
+                  <div flex="70">
                     <md-input-container class="md-block">
-                      <md-icon class="material-icons">add_shopping_cart</md-icon>
+                      <md-icon class="material-icons">shopping_cart</md-icon>
                       <md-select  name="produto" placeholder="Produto" ng-model="venda.produto" ng-required="true" md-on-open="carregarProdutos()">
-                        <md-option ng-value="$index" ng-repeat="produto in produtos track by $index">
-                          <img style="max-height: 20px;" src="{{produto.imagem}}" /> {{produto.nome}} - {{produto.tamanho}} - {{produto.precoVenda | currency}}
+                        <md-option ng-value="$index" ng-repeat="produto in produtos track by $index">                          
+                          <div ng-show="produto.estoque > 0">
+                            <img style="max-height: 20px;" src="{{produto.imagem}}" /> {{produto.nome}} - {{produto.tamanho}} - {{produto.precoVenda | currency}}
+                          </div>
+                          <div ng-show="produto.estoque == 0">
+                              Acabou o estoque de {{produto.nome}}
+                          </div>
                         </md-option>
                       </md-select>
                     </md-input-container>
@@ -86,12 +92,19 @@
 
                 <div layout="row">
                   <div flex>
-                    <md-input-container class="md-block">
-                      <label>Reserva</label>
+                    
+                      
                       <md-switch ng-model="venda.reserva" aria-label="Switch 1">
-
+                        Reservar Produtos 
                       </md-switch>
-                    </md-input-container>
+                      <div ng-show="venda.reserva">(os produtos dessa venda ser&atilde;o reservados)</div>
+                    
+                  </div>
+                  <div flex ng-if="venda.id">
+                      <md-switch ng-model="venda.estorna" aria-label="Switch 1">
+                        Estornar Venda
+                      </md-switch>
+                      <div ng-show="venda.estorna">(os produtos dessa venda voltaram para o estoque assim como os creditos)</div>                    
                   </div>
                 </div>
               </md-card-content>
@@ -142,13 +155,31 @@
       $mdThemingProvider.theme('default')
       .primaryPalette('pink')
       .accentPalette('orange');
+    }) .service('PropriedadesCompartilhadas', function ($http) {
+        var ItemSelecionado = '';
+        var clientes = null;
+        return {        
+            setClientes: function() {
+              
+              clientes || $http.get("controller/consultarCliente.php").then(function(response) {                
+                clientes = response.data;
+                console.log(clientes);
+
+              });
+            },
+            getClientes: function () {
+              return clientes;
+            }
+        };
     })
-    .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log,$mdMedia, $rootScope) {
+    .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log,$mdMedia, $rootScope,PropriedadesCompartilhadas) {
       $scope.formVenda = {};      
       $scope.toggleLeft = buildDelayedToggler('left');      
       $scope.venda = {produto: {}};
       $scope.venda.valorTotal = 0;
       $scope.produtosVenda = [];
+      PropriedadesCompartilhadas.setClientes();
+      
       $scope.showAlert = function(ev,message,title = "Alerta") {
         // Appending dialog to document.body to cover sidenav in docs app
         // Modal dialogs should fully cover application
@@ -177,6 +208,9 @@
         return confirm;
       };
 
+      $scope.getClientes = function(){                
+          $scope.clientes = PropriedadesCompartilhadas.getClientes();        
+      }
 
       $scope.showAdvanced = function(ev) {
         if($scope.formVenda.$valid){
@@ -210,6 +244,7 @@
         $mdDialog.show(confirm).then(function() {
             //procura o objeto por index
             $scope.venda.valorTotal -= $scope.produtosVenda[index].precoVenda * $scope.produtosVenda[index].qtd;
+            $scope.produtos[index].estoque += $scope.produtosVenda[index].qtd;
             array.splice(index,1); 
           }, function() {
             $scope.status = 0;
@@ -239,8 +274,7 @@
 
             if(response.data == 1){     
               //reseta venda
-              $scope.venda = [{valorTotal: 0}];
-              $scope.produtosVenda = [];
+              $scope.resetaVenda();
               //mensagem para usuario
               $scope.showAlert($event,"Venda realizada com sucesso!");
             }else{
@@ -255,17 +289,35 @@
         }
       };
 
-      $scope.carregarClientes = function(){
-        $scope.clientes || $http.get("controller/consultarCliente.php").then(function(response) {
-          $scope.clientes = response.data;
-        });
+      $scope.resetaVenda = function(){
+        $scope.venda = [{valorTotal: 0}];
+        $scope.produtosVenda = [];
       }
-
+  
       $scope.carregarProdutos = function(){
         $scope.produtos || $http.get("controller/consultarProduto.php").then(function(response) {
           $scope.produtos = response.data;
         });
       }
+
+       $scope.carregarVenda = function(ev) {       
+      
+        //$scope.progressbar.start();
+             
+        var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+        $mdDialog.show({
+          controller: DialogController,
+          templateUrl: "dialog/listaVendas.html",
+          parent: angular.element(document.body),
+           // scope: $scope,
+           targetEvent: ev,
+           clickOutsideToClose:true,
+           fullscreen: useFullScreen,
+           locals: {
+            scope2: $scope
+          }
+        });                  
+      };
 
       $scope.adicionarProdutos = function(){
         var existe = false;
@@ -274,7 +326,7 @@
         //se nao preencher a quantidade, coloca 1
         $scope.venda.qtdProduto = $scope.venda.qtdProduto || 1;
 
-        if($scope.venda.produto != undefined)
+        if($scope.venda.produto != undefined && $scope.produtos[index].estoque > 0)
         {//se existir algum produto escolhido
 
           angular.forEach($scope.produtosVenda,function(obj){
@@ -291,6 +343,8 @@
             $scope.produtosVenda = $scope.produtosVenda.concat([angular.copy($scope.produtos[index])]);//copia o objeto de $scope.produtos para scope.produtosVenda
             $scope.venda.valorTotal += (parseFloat($scope.produtos[index].precoVenda) || 0 * $scope.venda.qtdProduto );
           }
+
+          $scope.produtos[index].estoque -= $scope.venda.qtdProduto;//tira do estoque a quantidade que esta sendo vendida
         }     
 
       }    
@@ -330,7 +384,14 @@
     })  
 
   //quando montado o dialog
-  function DialogController($scope, $mdDialog, $rootScope,scope2) {
+  function DialogController($scope, $mdDialog, $rootScope,scope2,PropriedadesCompartilhadas) {   
+
+    $scope.clientes = PropriedadesCompartilhadas.getClientes();
+
+    $scope.getVendas = function(){
+      console.log($scope.cliente);
+    }
+
     $scope.enviar = function(ev) {
       scope2.venda.valorPago = $scope.venda.valorPago;
       console.log(scope2.venda.valorPago)
@@ -340,6 +401,7 @@
         scope2.venda.valorBonus = scope2.venda.valorPago - scope2.venda.valorTotal;
       }
       scope2.vender(ev);//.vender(ev);
+
       $mdDialog.hide();
     };
   }

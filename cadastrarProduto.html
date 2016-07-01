@@ -271,7 +271,7 @@
       //quando montado o dialog
       function DialogController($scope, $mdDialog, $rootScope, $http,scope2,$mdDialog) {
         //carrega todos os clientes
-        $http.get("controller/consultarProduto.php").then(function(response)  {           
+        $http.post("controller/consultarProduto.php",{id: -1}).then(function(response)  {           
           $scope.produtos = response.data;     
            scope2.progressbar.complete();      
         });
