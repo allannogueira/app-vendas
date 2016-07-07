@@ -10,48 +10,53 @@
 	$venda = new Venda();
 	$vendaProduto = new VendaProduto();
 
-	$cliente = $_POST['cliente'];
-    $reserva = $_POST['reserva'];
-	$produtos = $_POST['produtos'];
-    $valorBonus = $_POST['valorBonus'];
-	//$valorDesconto = $_POST['valorDesconto'];
-	$valorPago = $_POST['valorPago'];
-
-
-    //formatando dinheiro para salvar corretamente no banco de dados
-    $valorPago = str_replace(".", "", $valorPago);
-    $valorPago = str_replace(",", ".", $valorPago);
-
-    $valorBonus = str_replace(",", ".", $valorBonus);
-    $valorBonus = str_replace(",", ".", $valorBonus);
+    $id = "";
+    if(isset($_POST['venda']['id'])){
+        $id = $_POST['venda']['id'];
+    }
+	$cliente = $_POST['venda']['cliente'];
+    $reserva = $_POST['venda']['reserva'];	
+    $valorBonus = $_POST['venda']['valorBonus'];//bonus caso tenha pago um valor maior do que a compra
+    $valorCredito = $_POST['venda']['creditoCliente'];//credito que o cliente ja tem, entao esse credito será usado para abater no valor da compra
+	$valorDesconto = $_POST['venda']['valorDesconto'];
+	$valorPago = $_POST['venda']['valorPago'];
+    $valorTotal = $_POST['venda']['valorTotal'];//valor total da venda
+    $produtos = $_POST['produtos'];
+    
+    if($valorCredito > $valorTotal){//se o valor da venda for maior
+        $creditoUtilizado = $valorTotal;//vai usar o credito no valor da venda
+    }else{
+        $creditoUtilizado = $valorCredito;//vai utilizar todo o credito
+    }
 
     //classe Venda
-	$venda->setDataVenda(date("Y-m-d"));
-    $venda->setValorDesconto("");
+    $venda->setId($id);
+	$venda->setDataVenda(date("Y-m-d h:i:s"));
+    $venda->setValorDesconto($valorDesconto);
     $venda->setValorPago($valorPago);
     $venda->setClienteId($cliente);
     $venda->setReserva($reserva);
+    $venda->setValorTotal($valorTotal);
+    $venda->setCreditoUtilizado($creditoUtilizado);
     $venda->salvar($conexao->connect());
 
     //se retornou um id de venda, é pq cadastrou a venda
     if($venda->getId() != ""){
     	$vendaProduto->setVendaId($venda->getId());        
-    	foreach($produtos as $produto){//entao agora ira cadastrar os produtos dessa venda    		
+    	foreach($produtos as $produto){//entao agora vai cadastrar os produtos dessa venda  
             $vendaProduto->setPrecoVenda($produto["precoVenda"]);
     		$vendaProduto->setProdutoId($produto["id"]);
     		$vendaProduto->setQtdProduto($produto["qtd"]);//quantidade do produto que esta sendo vendido
-    		echo $vendaProduto->salvar($conexao->connect());exit;
+    		$vendaProduto->salvar($conexao->connect());
     	}
-
-        //salva o valor do bonus no cadastro do cliente
-        if($valorBonus > 0){
-            $objCliente = new Cliente();
-            $objCliente->setId($cliente);            
-            $objCliente->setCredito($valorBonus);
-            $objCliente->salvarCredito($conexao->connect());
-        }
-    	echo 1;
-    }else{
-    	echo 0;
+    	
     }
+
+    //salva o valor do bonus no cadastro do cliente   
+    $objCliente = new Cliente();
+    $objCliente->setId($cliente);            
+    $objCliente->setCredito($valorBonus);//coloca bonus se pagar mais do que devia, e desconta os creditos que foi usado para essa compra
+    $objCliente->salvarCredito($conexao->connect());
+
+    echo 1;
 ?>

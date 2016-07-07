@@ -7,6 +7,8 @@ class Venda{
     private $valorPago;
     private $clienteId;
     private $reserva;
+    private $valorTotal;
+    private $creditoUtilizado;
 
 
     /**
@@ -152,14 +154,64 @@ class Venda{
 
         return $this;
     }
+    /**
+     * Gets the value of clienteId.
+     *
+     * @return mixed
+     */
+    public function getValorTotal()
+    {
+        return $this->valorTotal;
+    }
+
+    /**
+     * Sets the value of clienteId.
+     *
+     * @param mixed $clienteId the cliente id
+     *
+     * @return self
+     */
+    public function setValorTotal($valorTotal)
+    {
+        $this->valorTotal = $valorTotal;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of clienteId.
+     *
+     * @return mixed
+     */
+    public function getCreditoUtilizado()
+    {
+        return $this->creditoUtilizado;
+    }
+
+    /**
+     * Sets the value of clienteId.
+     *
+     * @param mixed $clienteId the cliente id
+     *
+     * @return self
+     */
+    public function setCreditoUtilizado($creditoUtilizado)
+    {
+        $this->creditoUtilizado = $creditoUtilizado;
+
+        return $this;
+    }
 
     public function salvar($conexao){
-        $sql = "INSERT INTO ddc_app_vendas.venda (
+        if($this->id == ""){
+            $sql = "INSERT INTO ddc_app_vendas.venda (
                     data_venda
                     ,valor_desconto
                     ,valor_pago
                     ,cliente_id
                     ,reserva
+                    ,valor_total
+                    ,credito_utilizado
                 )
                 VALUES(
                     '".$this->dataVenda."'
@@ -167,15 +219,67 @@ class Venda{
                     ,'".$this->valorPago."'
                     ,'".$this->clienteId."'    
                     ,'".$this->reserva."'
+                    ,'".$this->valorTotal."'
+                    ,'".$this->creditoUtilizado."'
                 )
-        ";
-        $result = mysqli_query($conexao,$sql);
-        
+            ";
+        }else{
+             $sql = "UPDATE ddc_app_vendas.venda SET
+                    data_venda = '".$this->dataVenda."'
+                    ,valor_desconto = '".$this->valorDesconto."'
+                    ,valor_pago = '".$this->valorPago."'
+                    ,cliente_id = '".$this->clienteId."'    
+                    ,reserva = '".$this->reserva."'
+                    ,valor_total = '".$this->valorTotal."'
+                    ,credito_utilizado = '".$this->creditoUtilizado."'
+                    where id = '".$this->id."'
+            ";
+        }
+
+        $result = mysqli_query($conexao,$sql);        
         if($result){
             $id = mysqli_insert_id($conexao);
             $this->setId($id);
             return $id;
         }
+        return $result;
+    }
+
+    public function getVendas($conexao,$idCliente,$reserva,$cancelada){            
+        $sql = "select 
+                    *, 
+                    (select nome from ddc_app_vendas.cliente where id = cliente_id) as nomeCliente,
+                    (select credito from ddc_app_vendas.cliente where id = cliente_id) as creditoCliente
+                from ddc_app_vendas.venda 
+                where 
+                    (cliente_id = '".$idCliente."' or '".$idCliente."' = '') 
+                    and reserva = '".$reserva."' 
+                    and cancelada = '".$cancelada."' 
+                order by data_venda,id desc";
+        
+        $result = mysqli_query($conexao,$sql);
+        while($row = mysqli_fetch_array($result)){
+
+        $retorno[] = array(
+              "id" => $row["id"]
+              ,"dataVenda" => $row["data_venda"]
+              ,"valorDesconto" => (float)$row["valor_desconto"]
+              ,"valorPago"=>(float)$row["valor_pago"]
+              ,"cliente"=> (int)$row["cliente_id"]
+              ,"reserva" => (bool)$row["reserva"]              
+              ,"valorTotal" => (float)$row["valor_total"]
+              ,"creditoUtilizado"=>(float)$row["credito_utilizado"]
+              ,"cancelada" => (booL)$row["cancelada"]   
+              ,"nomeCliente" => $row["nomeCliente"]
+              ,"creditoCliente" => $row["creditoCliente"]
+            );
+        }
+        return json_encode($retorno);
+    }
+
+    public function cancelarVenda($conexao,$idVenda){
+        $sql = "update ddc_app_vendas.venda set cancelada = 1 where id = '".$idVenda."'";
+        $result = mysqli_query($conexao,$sql);
         return $result;
     }
 }

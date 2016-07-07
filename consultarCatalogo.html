@@ -20,6 +20,11 @@
     .galleria{
       height: 300px;
     }
+
+    .galleria-theme-classic,.galleria-theme-classic .galleria-thumbnails .galleria-image{
+      background: none;
+      border: 1px solid #CCC;
+    }
   </style>
 </head>
 <body ng-app="myApp">
@@ -37,7 +42,7 @@
       </div>
     </md-toolbar>
     <section layout="row" flex> 
-      <div layout="column"  ng-cloak>
+      <!--div layout="column"  ng-cloak>
         <section layout="row" flex>
           <md-sidenav class="md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" md-disable-backdrop md-whiteframe="4" style="top: 57px">
             <md-toolbar class="md-theme-indigo">
@@ -49,15 +54,18 @@
             <div class="mdl-layout__drawer" ng-include="'menu.html'"></div>
           </md-sidenav>   
         </section>
-      </div>
+      </div-->
       <md-content flex layout-padding>     
 
 
         <div  ng-repeat="produto in produtos track by $index" my-repeat-directive>                
 
           <div ng-if="produto.cod != produtos[$index-1].cod">
-            <h2 style="align: text-center">
-              {{ produto.nome }} - <strong style="color: green">{{ produto.precoVenda | currency}}</strong>                    
+            <h2 style="text-align: center">
+              {{ produto.nome }} 
+              <br/>
+              <strong>{{ produto.precoVenda | currency}}</strong>      
+              <img ng-if="produto.promocao" style="width: 15%; max-width: 100px; position: absolute; margin-top: 103px; left: 17; z-index: 30000" src="img/promocao.png"></img>
             </h2>
 
             <p>

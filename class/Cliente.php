@@ -253,14 +253,13 @@ class Cliente{
 
 
     public function salvarCredito($conexao){
-
          $sql = "UPDATE 
                     ddc_app_vendas.cliente 
                 SET
-                    credito = credito + '".$this->credito."'
+                    credito = '".$this->credito."'
                 WHERE
-                    id = '".$this->id."'                    
-            ";    
+                    id = '".$this->id."'
+            ";
         $result = mysqli_query($conexao,$sql);
         return $result;
     }
@@ -329,10 +328,16 @@ class Cliente{
                 ,"estado"=>$row["estado"]
                 ,"cpf"=>$row["cpf"]
                 ,"telefone"=>$row["telefone"]
-                ,"credito"=>$row["credito"]
+                ,"credito"=>(float)$row["credito"]
             );    
         }
         return json_encode($retorno);
+    }
+
+    public function insereCreditoCliente($conexao,$qtdCredito,$idCliente){
+        $sql = "UPDATE ddc_app_vendas.cliente SET credito = ".$qtdCredito." where id= '".$idCliente."' ";                
+        $result = mysqli_query($conexao,$sql);
+        return $result;
     }
 }
 

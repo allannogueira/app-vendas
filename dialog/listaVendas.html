@@ -9,33 +9,58 @@
     </md-toolbar>
     <md-dialog-content>
       <div class="md-dialog-content">
-       <div flex>
-          <md-input-container class="md-block">
-            <md-icon class="material-icons">person</md-icon>
-            <label>Cliente</label>
-            <md-select name="cliente" placeholder="Cliente" ng-model="cliente" ng-required="true" ng-change="getVendas()">
-              <md-option ng-value="cliente.id" ng-repeat="cliente in clientes track by $index"> &nbsp; {{cliente.nome}}</md-option>
-            </md-select>
-          </md-input-container>  
-<!--
-          <md-list ng-cloak >
-            <!-- md-subheader class="md-no-sticky">3 line item (with hover)</md-subheader-->
-    <!--        <md-list-item ng-repeat="produto in produtos | filter: pesquisaProduto" ng-click="buscaProduto($event,produto.id)" class="noright" style="height: 48px">
-              <!--img alt="{{ person.name }}" ng-src="{{ person.img }}" class="md-avatar" /-->
-        <!--      <p>{{ produto.nome }}</p>
+       <div ng-cloak>
+        <md-card md-theme="{{ showDarkTheme ? 'dark-grey' : 'default' }}" md-theme-watch>
+          <md-card-content  layout-align="space-between">
+            <md-input-container class="md-block">
+              <md-icon class="material-icons">person</md-icon>
+              <label>Cliente</label>
+              <md-select name="cliente" placeholder="Cliente" ng-model="cliente" ng-required="true" >
+                <md-option ng-value="cliente.id" ng-repeat="cliente in clientes track by $index"> &nbsp; {{cliente.nome}}</md-option>
+              </md-select>
+              <md-switch ng-model="reserva" aria-label="Switch 1">
+                Reservados
+              </md-switch>
+              <md-switch ng-model="cancelada" aria-label="Switch 1">
+                Cancelados
+              </md-switch>
+              <md-button type="button" class="md-primary md-raised" ng-click="getVendas()">
+              Consultar
+            </md-button>
+            </md-input-container>  
+          </md-card-content>
+        </md-card>
+        <md-list ng-if="vendas">
+
+          <!-- md-subheader class="md-no-sticky">3 line item (with hover)</md-subheader-->
+          <md-list-item ng-repeat="venda in vendas track by $index"  style="height: 100px" class="md-3-line" >
+            <!--img alt="{{ person.name }}" ng-src="{{ person.img }}" class="md-avatar" /-->
+            <div class="md-list-item-text" >
+              <h3><strong>Cliente: </strong> {{ venda.nomeCliente }}</h3>
+              
+              <h4><strong>Valor:</strong> {{ venda.valorTotal | currency}}</h4>
+              <p>
+                <strong>Data: </strong> {{ venda.dataVenda | datetime }}
+              </p>
+              <md-button class="md-secondary" ng-click="carregaVenda($index)">Abrir</md-button>
+            </div>
+            <md-divider></md-divider>
               <!--md-checkbox class="md-secondary" ng-model="person.selected"></md-checkbox>
               <md-icon md-svg-icon="communication:email"  ng-click="doSecondaryAction($event)" aria-label="Send Email" class="md-secondary md-hue-3" ></md-icon>
               <md-icon class="md-secondary" ng-click="doSecondaryAction($event)" aria-label="Chat" md-svg-icon="communication:message"></md-icon-->
-            <!--</md-list-item>
-          </md-list>                                  
--->
-      </div>
-    </div>
-  </md-dialog-content>
-  <md-dialog-actions layout="row">
-    <md-button ng-click="hide();">
-      OK
-    </md-button>
-  </md-dialog-actions>
-</form>
-</md-dialog>
+              </md-list-item>
+            </md-list>               
+
+            <div ng-show="!vendas">
+              <p>Nenhuma venda ou pedido encontrado.</p>  
+            </div>
+          </div>
+        </div>
+      </md-dialog-content>
+      <md-dialog-actions layout="row">
+        <md-button ng-click="hide();">
+          FECHAR
+        </md-button>
+      </md-dialog-actions>
+    </form>
+  </md-dialog>

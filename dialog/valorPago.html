@@ -7,18 +7,60 @@
       </div>
     </md-toolbar>
     <md-dialog-content>
+      {{venda.valorPago.replace('.','')}}
       <div class="md-dialog-content">
-      	  <div flex>
-            <md-input-container>
-              <label>Valor</label>
-              <input type="text"  ng-model="venda.valorPago" ng-currency>              
+          <div flex ng-if="venda.creditoCliente > 0">
+            Existe um crédito de <strong>{{venda.creditoCliente | currency}}</strong> para o cliente. Será abatido no valor da compra.                         
+          </div>
+          
+          <br/>
+
+
+          <div flex>
+            <md-switch ng-model="venda.oferecerDesconto" aria-label="Switch 1" ng-click="venda.valorDesconto = 0" ng-change="(venda.oferecerDesconto) ? console.log('haha') : console.log('hehe')">
+              Quero oferecer desconto
+            </md-switch>
+
+            <md-input-container ng-if="venda.oferecerDesconto">
+              <label>Digite o valor do desconto</label>
+              <input type="text"   ng-model="venda.valorDesconto" ng-currency onclick="this.value = ''">
             </md-input-container>
           </div>
+
+          <br/>
+      	  <div flex>       
+
+            <div ng-if="venda.id"> Valor que já pagou: {{valorFoiPago | currency}}  </div>
+            <md-input-container>
+              <label>Digite o valor que será pago</label>
+              <input type="text"  id="valorPago" ng-model="venda.valorPago" ng-click="venda.valorPago = '';" ng-blur="venda.valorPago = venda.valorPago + (valorFoiPago || 0)" ng-currency>
+            </md-input-container>
+          </div>
+
+          
+          <p ng-if="valorTotalVenda > venda.creditoCliente">
+
+            <div ng-if="(valorTotalVenda - venda.valorDesconto - venda.valorPago - venda.creditoCliente - venda.creditoUtilizado) > 0">
+              Resta pagar             
+              <strong>{{valorTotalVenda - venda.valorDesconto - venda.valorPago - venda.creditoCliente - venda.creditoUtilizado | currency}} </strong>
+            </div>
+            
+            <div ng-if="((valorTotalVenda - venda.valorDesconto - venda.valorPago - venda.creditoCliente  - venda.creditoUtilizado) < 0 ) && venda.valorPago > 0">
+              Cliente receberá crédito no valor de: 
+              <strong>{{((valorTotalVenda - venda.valorDesconto - venda.valorPago - venda.creditoCliente  - venda.creditoUtilizado) * -1 | currency}} </strong>
+            </div>
+
+            
+          </p>
       </div>
     </md-dialog-content>
     <md-dialog-actions layout="row">
+     
       <md-button ng-click="enviar($event);">
       	 OK
+      </md-button>
+       <md-button ng-click="hide($event);">
+         Cancelar
       </md-button>
     </md-dialog-actions>
   </form>

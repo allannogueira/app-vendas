@@ -1,6 +1,9 @@
 <html lang="en" >
 <head>
+  <meta http-equiv="Content-Type" content="text/html" charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="resource-type" content="document" />
   <!-- Angular Material style sheet -->
   <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -23,8 +26,7 @@
           <span>APP VENDAS</span>
         </h2>
         <span flex></span>
-        <md-button ng-click="resetaVenda()" class="md-primary md-raised">Nova Venda</md-button>
-        <md-button ng-click="carregarVenda($event)" class="md-primary md-raised">Carregar Venda</md-button>
+
       </div>
     </md-toolbar>
 
@@ -45,8 +47,21 @@
       </div>
 
       <div layout="column" flex="100">
-        <md-content flex layout-padding>           
-          <form ng-submit="showAdvanced($event)" name="formVenda"  novalidate>
+        <md-content flex layout-padding>              
+          <div flex>
+            <md-button ng-click="resetaVenda()" class="md-primary md-raised">Nova</md-button>
+            <md-button ng-click="carregarVenda($event)" class="md-primary md-raised">Carregar</md-button>
+            <md-button ng-show="venda.id" ng-click="(venda.cancelada) ? (venda.cancelada = true) : cancelarVenda($event)" class="md-primary md-raised">Cancelar</md-button> 
+            <md-button ng-show="venda.reserva && venda.id" ng-click="transformarReservaParaVenda($event)" class="md-primary md-raised">Reserva -> Venda</md-button>           
+          </div>
+          <!-- quando for reserva, chama a tela de venda direto para não passar por calculo de bonus e etc-->
+          <form ng-submit="(venda.reserva) ? vender($event) : showAdvanced($event)" name="formVenda"  novalidate>
+            <input type="hidden" name="id" ng-model="venda.id" />
+            <input type="hidden" name="valorDesconto" ng-model="venda.valorDesconto" />
+            <input type="hidden" name="valorPago" ng-model="venda.valorPago" />
+            <input type="hidden" name="creditoUtilizado" ng-model="venda.creditoUtilizado" />
+
+            <h1 ng-show="venda.id">Venda numero: {{venda.id}}</h1>
             <md-card md-theme="{{ showDarkTheme ? 'dark-grey' : 'default' }}" md-theme-watch>
               <md-card-content  layout-align="space-between">
                 <div layout="row">
@@ -54,14 +69,15 @@
                     <md-input-container class="md-block">
                       <md-icon class="material-icons">person</md-icon>
                       <label>Cliente</label>
-                      <md-select name="cliente" placeholder="Cliente" ng-model="venda.cliente" ng-required="true" md-on-open="getClientes()">
-                        <md-option ng-value="cliente.id" ng-repeat="cliente in clientes track by $index"> &nbsp; {{cliente.nome}}</md-option>
+                      <md-select name="cliente" placeholder="Cliente" ng-model="venda.cliente" md-on-open="getClientes()">
+                        <md-option ng-value="cliente.id" ng-repeat="cliente in clientes" ng-click="setaCreditoCliente($index)"  ng-selected="cliente.id == venda.cliente ? true : false"> &nbsp; {{cliente.nome}}</md-option>
+                        
                       </md-select>
                     </md-input-container>      
                   </div>
                 </div>
 
-                <div layout="row">
+                <div layout="row"  flex ng-if="!venda.id">
                   <div flex="70">
                     <md-input-container class="md-block">
                       <md-icon class="material-icons">shopping_cart</md-icon>
@@ -71,7 +87,7 @@
                             <img style="max-height: 20px;" src="{{produto.imagem}}" /> {{produto.nome}} - {{produto.tamanho}} - {{produto.precoVenda | currency}}
                           </div>
                           <div ng-show="produto.estoque == 0">
-                              Acabou o estoque de {{produto.nome}}
+                            Acabou o estoque de {{produto.nome}}
                           </div>
                         </md-option>
                       </md-select>
@@ -91,96 +107,153 @@
                 </div>
 
                 <div layout="row">
-                  <div flex>
-                    
-                      
-                      <md-switch ng-model="venda.reserva" aria-label="Switch 1">
-                        Reservar Produtos 
-                      </md-switch>
-                      <div ng-show="venda.reserva">(os produtos dessa venda ser&atilde;o reservados)</div>
-                    
+                  <div>
+                    <md-switch ng-model="venda.reserva" aria-label="Switch 1" ng-change="(venda.cancelada) ? console.log('haha') : console.log('hehe')">
+                      Apenas reservar os produtos
+                    </md-switch>
+                    <div ng-show="venda.reserva">(os produtos ser&atilde;o reservados)</div>
                   </div>
                   <div flex ng-if="venda.id">
-                      <md-switch ng-model="venda.estorna" aria-label="Switch 1">
-                        Estornar Venda
-                      </md-switch>
-                      <div ng-show="venda.estorna">(os produtos dessa venda voltaram para o estoque assim como os creditos)</div>                    
+                    <md-switch ng-model="venda.cancelada" aria-label="Switch 1" ng-change="(!venda.cancelada) ? (venda.cancelada = true) : cancelarVenda($event)">
+                      Venda Cancelada
+                    </md-switch>                      
+                    <div ng-show="venda.cancelada">(os produtos dessa venda voltaram para o estoque assim como os creditos voltaram para o cliente caso tenha deixado algum produto pago.)</div>                    
                   </div>
                 </div>
               </md-card-content>
             </md-card>
             <!-- Colored raised button -->            
 
-            <md-list class="md-dense" flex="" ng-show="produtosVenda != ''">
-              <md-subheader class="md-no-sticky">Itens selecionados</md-subheader>
-              <md-list-item class="md-3-line" ng-repeat="item in produtosVenda track by $index" ng-click="remove($event,produtosVenda,$index)">
+            <md-list class="md-dense" flex="" ng-show="produtosVenda != ''">             
+              <md-list-item class="md-3-line" ng-repeat="item in produtosVenda track by $index" ng-click="(!venda.id) ? remove($event,produtosVenda,$index) : '' ">
                 <img ng-src="{{item.imagem}}" class="md-avatar" alt="{{item.nome}}" />
                 <div class="md-list-item-text" layout="column" flex="33">
                   <h3>{{item.qtd}}x - {{ item.nome }} - {{item.cod}}</h3>
                   <h4>{{ item.tamanho }}</h4>
-                  <p>{{ item.precoVenda | currency }}</p>
+                  <p>{{ item.precoVenda * item.qtd | currency }}</p>                  
                 </div>
-                <md-icon class="material-icons" layout-align="right right" >delete</md-icon>
+                <md-icon ng-show="!venda.id" class="material-icons" layout-align="right right" >delete</md-icon>
               </md-list-item>
             </md-list>
 
 
-            <md-list class="md-dense" flex=""  ng-show="produtosVenda != ''">
-              <md-subheader class="md-no-sticky">Valor Total: <strong>{{venda.valorTotal | currency}}</strong></md-subheader>             
-            </md-list>
-            <md-button type="submit" class="md-primary md-raised" ng-show="produtosVenda != ''">
-              Realizar Venda
-            </md-button>
-          </form>
 
-        </md-content>
+            <md-list flex=""  ng-show="produtosVenda != ''" >
 
-      </div>
-    </section>
-  </div>
+              <md-list-item ng-show="venda.valorDesconto > 0" class="md-1-line" style="height: 48px">                
+                <div class="md-list-item-text">
+                  <p> Valor Desconto Especial: <strong>{{venda.valorDesconto | currency}}</strong></p>
+                </div>
+                <md-divider></md-divider>
+              </md-list-item>
 
-  <!-- Angular Material requires Angular.js Libraries -->
-  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
-  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
-  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
-  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
-  <!-- Angular Material Library -->
-  <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc.5/angular-material.min.js"></script>
-  <script src="js/angular-locale_pt-br.js"></script>
-  <script src="http://aguirrel.github.io/ng-currency/dist/ng-currency.js"></script>
+              <md-list-item ng-show="venda.valorPago > 0" class="md-1-line" style="height: 48px">
+                <div class="md-list-item-text">
+                  <p> Valor que foi pago em dinheiro: <strong>{{venda.valorPago | currency}}</strong></p>
+                </div>
+                <md-divider></md-divider>
+              </md-list-item>
 
-  <script type="text/javascript">
-    angular.module('myApp', ['ngMaterial','ng-currency'])
-    .config(function($mdThemingProvider) {
-      $mdThemingProvider.theme('default')
-      .primaryPalette('pink')
-      .accentPalette('orange');
-    }) .service('PropriedadesCompartilhadas', function ($http) {
-        var ItemSelecionado = '';
-        var clientes = null;
-        return {        
-            setClientes: function() {
+              <md-list-item ng-show="venda.creditoUtilizado > 0" class="md-1-line" style="height: 48px">
+                <div class="md-list-item-text">
+                  <p> Valor que foi pago em créditos: <strong>{{venda.creditoUtilizado | currency}}</strong></p>
+                </div>
+                <md-divider></md-divider>
+              </md-list-item>
               
-              clientes || $http.get("controller/consultarCliente.php").then(function(response) {                
-                clientes = response.data;
-                console.log(clientes);
 
-              });
-            },
-            getClientes: function () {
-              return clientes;
-            }
-        };
-    })
-    .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log,$mdMedia, $rootScope,PropriedadesCompartilhadas) {
-      $scope.formVenda = {};      
-      $scope.toggleLeft = buildDelayedToggler('left');      
-      $scope.venda = {produto: {}};
-      $scope.venda.valorTotal = 0;
-      $scope.produtosVenda = [];
-      PropriedadesCompartilhadas.setClientes();
-      
-      $scope.showAlert = function(ev,message,title = "Alerta") {
+              <md-list-item ng-show="venda.valorTotal > 0" class="md-1-line" style="height: 48px">
+                <div class="md-list-item-text">
+                  <p> Valor total a pagar: <strong>{{venda.valorTotal | currency}}</strong></p>
+                </div>                
+              </md-list-item>
+
+              <md-list-item class="md-1-line" style="height: 48px">
+                <md-divider></md-divider>
+                <div class="md-list-item-text">
+                 <div  ng-show="(((venda.valorTotal) - (venda.valorPago + venda.creditoUtilizado)) > 0) && venda.id ">                  
+                  <p>Valor que falta pagar: <strong>{{((venda.valorTotal) - (venda.valorPago + venda.creditoUtilizado)) | currency}}</strong></p>
+
+                </div>  
+              </div> 
+            </md-list-item>
+          </md-list>
+
+          <md-button type="submit" class="md-primary md-raised" ng-show="produtosVenda != '' && venda.id != null && (((venda.valorTotal) - (venda.valorPago + venda.creditoUtilizado)) > 0)">
+            <span>Pagar</span>
+          </md-button>
+
+          <md-button type="submit" class="md-primary md-raised" ng-show="produtosVenda != '' && venda.id == null">
+            <span ng-hide="venda.reserva">Realizar Venda</span>
+            <span ng-show="venda.reserva">Reservar Produtos</span>
+          </md-button>
+
+
+        </form>
+
+      </md-content>
+
+    </div>
+  </section>
+</div>
+
+<!-- Angular Material requires Angular.js Libraries -->
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
+<!-- Angular Material Library -->
+<script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc.5/angular-material.min.js"></script>
+<script src="js/angular-locale_pt-br.js"></script>
+<script src="http://aguirrel.github.io/ng-currency/dist/ng-currency.js"></script>
+
+<script type="text/javascript">
+  angular.module('myApp', ['ngMaterial','ng-currency'])
+  .config(function($mdThemingProvider) {
+    $mdThemingProvider.theme('default')
+    .primaryPalette('pink')
+    .accentPalette('orange');
+  }) .service('PropriedadesCompartilhadas', function ($http) {
+    var ItemSelecionado = '';
+    var clientes = null;
+    return {        
+      setClientes: function() {
+
+        clientes || $http.get("controller/consultarCliente.php").then(function(response) {                
+          clientes = response.data;
+          console.log(clientes);
+
+        });
+      },
+      getClientes: function () {
+        return clientes;
+      }
+    };
+  })
+
+  .filter('datetime', function($filter)
+  {
+   return function(input)
+   {
+    if(input == null){ return ""; } 
+
+    var _date = $filter('date')(new Date(input),
+      'dd/MM/yyyy - HH:mm:ss');
+
+    return _date.toUpperCase();
+
+  }
+})
+
+  .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log,$mdMedia, $rootScope,PropriedadesCompartilhadas) {
+    $scope.formVenda = {};      
+    $scope.toggleLeft = buildDelayedToggler('left');      
+    $scope.venda = {produto: {},valorTotal: 0, creditoCliente:0, valorBonus:0, cliente: 0};
+    $scope.produtosVenda = [];
+    PropriedadesCompartilhadas.setClientes();
+
+
+    $scope.showAlert = function(ev,message,title = "Alerta") {
         // Appending dialog to document.body to cover sidenav in docs app
         // Modal dialogs should fully cover application
         // to prevent interaction outside of dialog
@@ -209,16 +282,24 @@
       };
 
       $scope.getClientes = function(){                
-          $scope.clientes = PropriedadesCompartilhadas.getClientes();        
+        $scope.clientes = PropriedadesCompartilhadas.getClientes();     
+        console.log($scope.clientes);
       }
 
       $scope.showAdvanced = function(ev) {
-        if($scope.formVenda.$valid){
-          var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
-          $mdDialog.show({
-            controller: DialogController,
-            templateUrl: "dialog/valorPago.html",
-            parent: angular.element(document.body),
+       angular.forEach($scope.clientes,function(obj){
+            //verifico se ja existe o produto com mesmo tamanho e codigo
+            if(obj.id == $scope.venda.cliente){              
+              $scope.venda.creditoCliente = obj.credito;              
+            }
+          });     
+
+       if($scope.formVenda.$valid){
+        var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+        $mdDialog.show({
+          controller: DialogController,
+          templateUrl: "dialog/valorPago.html",
+          parent: angular.element(document.body),
             // scope: $scope,
             targetEvent: ev,
             clickOutsideToClose:true,
@@ -227,21 +308,23 @@
               scope2: $scope
             }
           });
-        }else{
-          $scope.showAlert(ev,"Verifique se selecionou o cliente.");
-        }
+      }else{
 
-        
-      };
+        console.log("cliente funcao showAdvanced:"+$scope.venda.cliente);
+        $scope.showAlert(ev,"Verifique se selecionou o cliente.");
+      }
 
-      $scope.remove = function(ev,array,index){
-        title = "Remover";
-        message = "Tem certeza que deseja remover o produto?";
 
-        var confirm = $scope.showConfirm(ev,message,title);
+    };
 
-        
-        $mdDialog.show(confirm).then(function() {
+    $scope.remove = function(ev,array,index){
+      title = "Remover";
+      message = "Tem certeza que deseja remover o produto?";
+
+      var confirm = $scope.showConfirm(ev,message,title);
+
+
+      $mdDialog.show(confirm).then(function() {
             //procura o objeto por index
             $scope.venda.valorTotal -= $scope.produtosVenda[index].precoVenda * $scope.produtosVenda[index].qtd;
             $scope.produtos[index].estoque += $scope.produtosVenda[index].qtd;
@@ -249,14 +332,44 @@
           }, function() {
             $scope.status = 0;
           });
-      }
+    }
 
-      $scope.vender = function($event) {   
-        if($scope.formVenda.$valid)
-        {
-          var objVenda = {cliente: $scope.venda.cliente, valorBonus: $scope.venda.valorBonus, reserva: $scope.venda.reserva, valorPago: $scope.venda.valorPago || 0, produtos: angular.copy($scope.produtosVenda)};
-          console.log(objVenda);
-          angular.forEach(objVenda.produtos,function(obj) {
+    $scope.transformarReservaParaVenda = function(ev){
+      title = "Pedido -> Venda";
+      message = "Tem certeza que deseja transformar esse pedido em uma venda?";
+
+      var confirm = $scope.showConfirm(ev,message,title);
+
+      $mdDialog.show(confirm).then(function() {
+
+         //cancela a reserva
+        if($scope.venda.cancelada != 1) {//pra nao voltar pro estoque e creditos novamente
+          $scope.venda.cancelada = 1;        
+          $http.post("controller/cancelarVenda.php", {venda: $scope.venda}).then(function(response) {              
+
+           //retira o id, para o sistema intender que é uma nova venda         
+           $scope.venda.id = 0;
+
+         });        
+        }else{//apenas cria uma nova venda com os produtos listados
+          $scope.venda.id = 0;        
+        }
+
+        $scope.venda.reserva = 0;
+        $scope.venda.cancelada = 0;
+
+      }, function() {
+        return;
+      });
+    }
+
+    $scope.vender = function($event) {       
+      if($scope.formVenda.$valid)
+      {
+        console.log($scope.venda)
+        var objVenda = {venda: $scope.venda, produtos: angular.copy($scope.produtosVenda)};
+
+        angular.forEach(objVenda.produtos,function(obj) {
             //verifico se ja existe o produto com mesmo tamanho e codigo
             delete obj.imagem;
             delete obj.nome;
@@ -265,9 +378,9 @@
             delete obj.cod;          
           });     
 
-          $http({
-            method : "POST",
-            url : "controller/vender.php",
+        $http({
+          method : "POST",
+          url : "controller/vender.php",
             data    : objVenda, //forms user object
             headers : {'Content-Type': 'application/x-www-form-urlencoded'} 
           }).then(function mySucces(response) {
@@ -290,20 +403,22 @@
       };
 
       $scope.resetaVenda = function(){
-        $scope.venda = [{valorTotal: 0}];
+        $scope.venda = {valorTotal: 0};        
         $scope.produtosVenda = [];
+        $scope.produtos = null;
       }
-  
+
       $scope.carregarProdutos = function(){
         $scope.produtos || $http.get("controller/consultarProduto.php").then(function(response) {
           $scope.produtos = response.data;
         });
       }
+      $scope.carregarProdutos();//carrega os produtos que serao selecionados para vender
 
-       $scope.carregarVenda = function(ev) {       
-      
+      $scope.carregarVenda = function(ev) {       
+
         //$scope.progressbar.start();
-             
+
         var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
         $mdDialog.show({
           controller: DialogController,
@@ -349,6 +464,21 @@
 
       }    
 
+      $scope.cancelarVenda = function(ev){
+       var message = "Tem certeza que deseja cancelar essa venda ?";
+       var title = "Confirma?"
+       var confirm = $scope.showConfirm(ev,message,title);
+
+       $mdDialog.show(confirm).then(function() {
+        $scope.venda.cancelada = 1;
+        $http.post("controller/cancelarVenda.php", {venda: $scope.venda}).then(function(response) {              
+          console.log(response);
+        });
+      }, function() {
+        $scope.venda.cancelada = 0;
+        console.log("operacao cancelada...");
+      });
+     }
 
 
       /**
@@ -381,29 +511,80 @@
           });
         }, 200);
       }  
+
+      function setaCreditoCliente($index){
+        $scope.venda.creditoCliente = clientes[$index].credito;
+      }
     })  
 
   //quando montado o dialog
-  function DialogController($scope, $mdDialog, $rootScope,scope2,PropriedadesCompartilhadas) {   
+  function DialogController($scope, $mdDialog, $rootScope,scope2,PropriedadesCompartilhadas,$http) {   
+    $scope.venda = angular.copy(scope2.venda);        
+    scope2.venda.valorDesconto = scope2.venda.valorDesconto || 0;    
+    
+    if($scope.venda.valorDesconto > 0)
+        $scope.venda.oferecerDesconto = true;
+    
+    $scope.valorFoiPago = scope2.venda.valorPago;
 
+    $scope.valorTotalVenda = scope2.venda.valorTotal + scope2.venda.valorDesconto; //para mostrar na tela certo    
     $scope.clientes = PropriedadesCompartilhadas.getClientes();
 
+    //lista as vendas sintetico para o usuario escolher qual vai abrir
     $scope.getVendas = function(){
-      console.log($scope.cliente);
+      console.log("chamou getVendas...");
+      $http.post("controller/consultarVenda.php", {cliente: $scope.cliente, reserva: $scope.reserva, cancelada: $scope.cancelada}).then(function(response) {      
+        if(response.data != 'null')
+          $scope.vendas = response.data;
+        else
+          $scope.vendas = false;
+        console.log($scope.vendas)      
+      });
     }
 
-    $scope.enviar = function(ev) {
+    //venda detalhada é carregada com todos os seus produtos e valores
+    $scope.carregaVenda = function($index){
+      var idVenda = $scope.vendas[$index].id;
+
+      $http.post("controller/consultarVenda.php", {idVenda: idVenda}).then(function(response) {
+        scope2.venda = angular.copy($scope.vendas[$index]);
+        scope2.produtosVenda = angular.copy(response.data);
+        $mdDialog.hide();
+      });
+    }
+
+    $scope.enviar = function(ev) {      
       scope2.venda.valorPago = $scope.venda.valorPago;
-      console.log(scope2.venda.valorPago)
+      scope2.venda.valorDesconto = $scope.venda.valorDesconto;
+
+      //se tiver desconto, retira do total
+      if(scope2.venda.valorDesconto > 0 && !scope2.venda.id){
+       scope2.venda.valorTotal = scope2.venda.valorTotal - scope2.venda.valorDesconto;
+     }
+
+
+      /*console.log(scope2.venda.valorPago)
       console.log(scope2.venda.valorTotal)
-      console.log(scope2.venda.valorPago > scope2.venda.valorTotal)
-      if(scope2.venda.valorPago > scope2.venda.valorTotal){//calcula bonus
-        scope2.venda.valorBonus = scope2.venda.valorPago - scope2.venda.valorTotal;
+      console.log(scope2.venda.valorPago > scope2.venda.valorTotal)*/
+      if(scope2.venda.creditoCliente >  scope2.venda.valorTotal){//se o cliente tiver mais credito que o valor total da compra, entao qualquer valor que ele pagar se tornará credito para ele novamente.
+       scope2.venda.valorBonus = scope2.venda.credito || 0  - scope2.venda.valorTotal || 0 + scope2.venda.valorPago || 0; 
+      }else{//se o valor de credito for menor do que o valor total da venda
+        if(scope2.venda.valorPago > (scope2.venda.valorTotal - scope2.venda.creditoCliente)){
+          scope2.venda.valorBonus = scope2.venda.valorPago - (scope2.venda.valorTotal - scope2.venda.creditoCliente);//o bonus sera a valor que foi pago menos a subtracao do total da venda com os creditos que ele ja tinha.
+        }else{
+          console.log("haha");
+          console.log(scope2.venda.valorBonus);
+          scope2.venda.valorBonus = 0;
+        }
       }
       scope2.vender(ev);//.vender(ev);
-
+      console.log(scope2.venda);
       $mdDialog.hide();
     };
+
+    $scope.hide = function(ev) {
+      $mdDialog.hide();
+    }
   }
 </script>
 </body>  
