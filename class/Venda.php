@@ -255,13 +255,13 @@ class Venda{
                     (cliente_id = '".$idCliente."' or '".$idCliente."' = '') 
                     and reserva = '".$reserva."' 
                     and cancelada = '".$cancelada."' 
-                order by data_venda,id desc";
+                order by id desc";
         
         $result = mysqli_query($conexao,$sql);
         while($row = mysqli_fetch_array($result)){
 
         $retorno[] = array(
-              "id" => $row["id"]
+              "id" => (int)$row["id"]
               ,"dataVenda" => $row["data_venda"]
               ,"valorDesconto" => (float)$row["valor_desconto"]
               ,"valorPago"=>(float)$row["valor_pago"]
@@ -271,7 +271,7 @@ class Venda{
               ,"creditoUtilizado"=>(float)$row["credito_utilizado"]
               ,"cancelada" => (booL)$row["cancelada"]   
               ,"nomeCliente" => $row["nomeCliente"]
-              ,"creditoCliente" => $row["creditoCliente"]
+              ,"creditoCliente" => (float)$row["creditoCliente"]
             );
         }
         return json_encode($retorno);

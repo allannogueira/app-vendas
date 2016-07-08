@@ -19,15 +19,11 @@
     $valorBonus = $_POST['venda']['valorBonus'];//bonus caso tenha pago um valor maior do que a compra
     $valorCredito = $_POST['venda']['creditoCliente'];//credito que o cliente ja tem, entao esse credito será usado para abater no valor da compra
 	$valorDesconto = $_POST['venda']['valorDesconto'];
+    $creditoUtilizado = $_POST['venda']['creditoUtilizado'];
 	$valorPago = $_POST['venda']['valorPago'];
     $valorTotal = $_POST['venda']['valorTotal'];//valor total da venda
     $produtos = $_POST['produtos'];
-    
-    if($valorCredito > $valorTotal){//se o valor da venda for maior
-        $creditoUtilizado = $valorTotal;//vai usar o credito no valor da venda
-    }else{
-        $creditoUtilizado = $valorCredito;//vai utilizar todo o credito
-    }
+
 
     //classe Venda
     $venda->setId($id);

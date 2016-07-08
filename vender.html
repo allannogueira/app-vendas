@@ -26,7 +26,12 @@
           <span>APP VENDAS</span>
         </h2>
         <span flex></span>
-
+        <a href="whatsapp://send?text=Produtos Comprados %0A--------------%0A%0A{{produtosComprados}}%0A--------------%0A%0A{{ (venda.valorTotal > 0) ? 'Valor Total da Compra:' +(venda.valorTotal | currency) +  '%0A': ''}}{{ (venda.valorTotal > 0) ? 'Valor que já pagou:'    +(venda.valorPago | currency) +  '%0A': ''}}{{ (venda.creditoCliente > 0) ? 'Seus Créditos:'         +(venda.creditoCliente | currency) +  '%0A': ''}}{{ (venda.creditoUtilizado > 0) ? 'Créditos utilizados:'   +(venda.creditoUtilizado | currency) +  '%0A': ''}}%0A--------------%0A{{(((venda.valorTotal) - (venda.valorPago + venda.creditoUtilizado)) > 0) ? '%0AValor que falta pagar:' + (((venda.valorTotal) - (venda.valorPago + venda.creditoUtilizado)) | currency)  : '' }} "><i class="material-icons">share</i></a>
+      
+      <!--
+      console.log($scope.venda.creditoCliente);
+      console.log($scope.venda.creditoUtilizado);
+      console.log($scope.venda.valorBonus);-->
       </div>
     </md-toolbar>
 
@@ -70,7 +75,7 @@
                       <md-icon class="material-icons">person</md-icon>
                       <label>Cliente</label>
                       <md-select name="cliente" placeholder="Cliente" ng-model="venda.cliente" md-on-open="getClientes()">
-                        <md-option ng-value="cliente.id" ng-repeat="cliente in clientes" ng-click="setaCreditoCliente($index)"  ng-selected="cliente.id == venda.cliente ? true : false"> &nbsp; {{cliente.nome}}</md-option>
+                        <md-option ng-value="cliente.id" ng-repeat="cliente in clientes" ng-selected="cliente.id == venda.cliente ? true : false"> &nbsp; {{cliente.nome}}</md-option>
                         
                       </md-select>
                     </md-input-container>      
@@ -132,39 +137,37 @@
                   <h4>{{ item.tamanho }}</h4>
                   <p>{{ item.precoVenda * item.qtd | currency }}</p>                  
                 </div>
+                
                 <md-icon ng-show="!venda.id" class="material-icons" layout-align="right right" >delete</md-icon>
               </md-list-item>
             </md-list>
 
-
-
             <md-list flex=""  ng-show="produtosVenda != ''" >
+
+              <md-list-item ng-show="venda.creditoUtilizado > 0" class="md-1-line" style="height: 48px">                
+                <div class="md-list-item-text">
+                  <p>Crédito Utilizado: <strong>{{venda.creditoUtilizado | currency}}</strong></p>
+                </div>
+                <md-divider></md-divider>
+              </md-list-item>
 
               <md-list-item ng-show="venda.valorDesconto > 0" class="md-1-line" style="height: 48px">                
                 <div class="md-list-item-text">
-                  <p> Valor Desconto Especial: <strong>{{venda.valorDesconto | currency}}</strong></p>
+                  <p>Desconto Especial: <strong>{{venda.valorDesconto | currency}}</strong></p>
                 </div>
                 <md-divider></md-divider>
               </md-list-item>
 
               <md-list-item ng-show="venda.valorPago > 0" class="md-1-line" style="height: 48px">
                 <div class="md-list-item-text">
-                  <p> Valor que foi pago em dinheiro: <strong>{{venda.valorPago | currency}}</strong></p>
+                  <p>Pago: <strong>{{venda.valorPago | currency}}</strong></p>
                 </div>
                 <md-divider></md-divider>
               </md-list-item>
-
-              <md-list-item ng-show="venda.creditoUtilizado > 0" class="md-1-line" style="height: 48px">
-                <div class="md-list-item-text">
-                  <p> Valor que foi pago em créditos: <strong>{{venda.creditoUtilizado | currency}}</strong></p>
-                </div>
-                <md-divider></md-divider>
-              </md-list-item>
-              
 
               <md-list-item ng-show="venda.valorTotal > 0" class="md-1-line" style="height: 48px">
                 <div class="md-list-item-text">
-                  <p> Valor total a pagar: <strong>{{venda.valorTotal | currency}}</strong></p>
+                  <p>À pagar: <strong>{{venda.valorTotal | currency}}</strong></p>
                 </div>                
               </md-list-item>
 
@@ -209,11 +212,16 @@
 
 <script type="text/javascript">
   angular.module('myApp', ['ngMaterial','ng-currency'])
-  .config(function($mdThemingProvider) {
+  .config(function($mdThemingProvider,$compileProvider) {
+    //other configuration code here
+   $compileProvider.aHrefSanitizationWhitelist(/^\s*(whatsapp):/);
+
     $mdThemingProvider.theme('default')
     .primaryPalette('pink')
     .accentPalette('orange');
-  }) .service('PropriedadesCompartilhadas', function ($http) {
+  })
+  
+   .service('PropriedadesCompartilhadas', function ($http) {
     var ItemSelecionado = '';
     var clientes = null;
     return {        
@@ -248,7 +256,8 @@
   .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log,$mdMedia, $rootScope,PropriedadesCompartilhadas) {
     $scope.formVenda = {};      
     $scope.toggleLeft = buildDelayedToggler('left');      
-    $scope.venda = {produto: {},valorTotal: 0, creditoCliente:0, valorBonus:0, cliente: 0};
+
+    $scope.venda = {produto: {},valorTotal: 0, valorPago: 0, creditoUtilizado: 0, creditoCliente:0, valorBonus:0, cliente: 0, valorFoiPago: 0};
     $scope.produtosVenda = [];
     PropriedadesCompartilhadas.setClientes();
 
@@ -288,7 +297,7 @@
 
       $scope.showAdvanced = function(ev) {
        angular.forEach($scope.clientes,function(obj){
-            //verifico se ja existe o produto com mesmo tamanho e codigo
+            //verifico o cliente, e coloco os creditos dele na venda
             if(obj.id == $scope.venda.cliente){              
               $scope.venda.creditoCliente = obj.credito;              
             }
@@ -512,22 +521,26 @@
         }, 200);
       }  
 
-      function setaCreditoCliente($index){
-        $scope.venda.creditoCliente = clientes[$index].credito;
-      }
+      /*function setaCreditoCliente($index){
+        $scope.venda.creditoCliente = $scope.clientes[$index].credito;
+      }*/
     })  
 
   //quando montado o dialog
   function DialogController($scope, $mdDialog, $rootScope,scope2,PropriedadesCompartilhadas,$http) {   
     $scope.venda = angular.copy(scope2.venda);        
-    scope2.venda.valorDesconto = scope2.venda.valorDesconto || 0;    
-    
+    $scope.venda.valorDesconto = $scope.venda.valorDesconto || 0;    
+
+    console.log($scope.venda);
+    if($scope.venda.id > 0){
+      $scope.venda.valorFoiPago = $scope.venda.valorPago;
+      $scope.venda.valorPago = 0;
+    }
+
     if($scope.venda.valorDesconto > 0)
         $scope.venda.oferecerDesconto = true;
     
-    $scope.valorFoiPago = scope2.venda.valorPago;
-
-    $scope.valorTotalVenda = scope2.venda.valorTotal + scope2.venda.valorDesconto; //para mostrar na tela certo    
+    $scope.venda.valorTotal = $scope.venda.valorTotal + $scope.venda.valorDesconto; //para mostrar na tela certo, depois faz o inverso ao enviar
     $scope.clientes = PropriedadesCompartilhadas.getClientes();
 
     //lista as vendas sintetico para o usuario escolher qual vai abrir
@@ -537,8 +550,7 @@
         if(response.data != 'null')
           $scope.vendas = response.data;
         else
-          $scope.vendas = false;
-        console.log($scope.vendas)      
+          $scope.vendas = false;    
       });
     }
 
@@ -549,36 +561,50 @@
       $http.post("controller/consultarVenda.php", {idVenda: idVenda}).then(function(response) {
         scope2.venda = angular.copy($scope.vendas[$index]);
         scope2.produtosVenda = angular.copy(response.data);
+
+        //concatena em produtosCOmprados apenas para montar a mensagem de envio para o whatsapp
+        angular.forEach(scope2.produtosVenda,function(item){
+          
+          //verifico se ja existe o produto com mesmo tamanho e codigo
+          scope2.produtosComprados = item.nome + ' - cod:' + item.cod + ' - qtd:' + item.qtd + '%0A';
+          
+        });     
+
         $mdDialog.hide();
       });
     }
 
-    $scope.enviar = function(ev) {      
-      scope2.venda.valorPago = $scope.venda.valorPago;
-      scope2.venda.valorDesconto = $scope.venda.valorDesconto;
-
+    $scope.enviar = function(ev) { 
+      $scope.venda.valorPago = $scope.venda.valorPago + $scope.venda.valorFoiPago;
+      
       //se tiver desconto, retira do total
-      if(scope2.venda.valorDesconto > 0 && !scope2.venda.id){
-       scope2.venda.valorTotal = scope2.venda.valorTotal - scope2.venda.valorDesconto;
-     }
-
-
-      /*console.log(scope2.venda.valorPago)
-      console.log(scope2.venda.valorTotal)
-      console.log(scope2.venda.valorPago > scope2.venda.valorTotal)*/
-      if(scope2.venda.creditoCliente >  scope2.venda.valorTotal){//se o cliente tiver mais credito que o valor total da compra, entao qualquer valor que ele pagar se tornará credito para ele novamente.
-       scope2.venda.valorBonus = scope2.venda.credito || 0  - scope2.venda.valorTotal || 0 + scope2.venda.valorPago || 0; 
-      }else{//se o valor de credito for menor do que o valor total da venda
-        if(scope2.venda.valorPago > (scope2.venda.valorTotal - scope2.venda.creditoCliente)){
-          scope2.venda.valorBonus = scope2.venda.valorPago - (scope2.venda.valorTotal - scope2.venda.creditoCliente);//o bonus sera a valor que foi pago menos a subtracao do total da venda com os creditos que ele ja tinha.
-        }else{
-          console.log("haha");
-          console.log(scope2.venda.valorBonus);
-          scope2.venda.valorBonus = 0;
-        }
+      if($scope.venda.valorDesconto > 0){
+       $scope.venda.valorTotal = $scope.venda.valorTotal - $scope.venda.valorDesconto;       
       }
+
+      //calcula bonus
+      var calculaBonus = ($scope.venda.valorTotal - $scope.venda.valorPago - $scope.venda.creditoCliente  - $scope.venda.creditoUtilizado) * -1;
+      if(calculaBonus > 0){
+        $scope.venda.valorBonus = calculaBonus;//o mesmo valor do bonus é o que é mostrado na tela.
+      }
+
+
+      console.log($scope.venda.valorTotal);
+      console.log($scope.venda.valorPago);
+      console.log($scope.venda.creditoCliente);
+      console.log($scope.venda.creditoUtilizado);
+      console.log($scope.venda.valorBonus);
+
+      //calcula creditos utilizados
+      if($scope.venda.creditoCliente > $scope.venda.valorTotal){//se o valor da venda for maior
+        $scope.venda.creditoUtilizado = $scope.venda.valorTotal;//vai usar o credito no valor da venda
+      }else{
+          $scope.venda.creditoUtilizado = $scope.venda.creditoCliente;//vai utilizar todo o credito
+      }
+
+      //atualiza escopo
+      scope2.venda = $scope.venda
       scope2.vender(ev);//.vender(ev);
-      console.log(scope2.venda);
       $mdDialog.hide();
     };
 

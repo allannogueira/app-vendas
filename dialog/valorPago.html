@@ -28,26 +28,29 @@
           </div>
 
           <br/>
-      	  <div flex>       
-
-            <div ng-if="venda.id"> Valor que já pagou: {{valorFoiPago | currency}}  </div>
+      	  <div flex>                   
             <md-input-container>
               <label>Digite o valor que será pago</label>
-              <input type="text"  id="valorPago" ng-model="venda.valorPago" ng-click="venda.valorPago = '';" ng-blur="venda.valorPago = venda.valorPago + (valorFoiPago || 0)" ng-currency>
+              <input type="text"  id="valorPago" ng-model="venda.valorPago" onclick="this.value = ''"  ng-currency>
             </md-input-container>
           </div>
 
-          
-          <p ng-if="valorTotalVenda > venda.creditoCliente">
+          <p ng-if="venda.id && venda.valorFoiPago > 0"> Valor que já pagou: {{venda.valorFoiPago | currency}}  </p>
+          <p ng-if="venda.valorTotal > venda.creditoCliente">
 
-            <div ng-if="(valorTotalVenda - venda.valorDesconto - venda.valorPago - venda.creditoCliente - venda.creditoUtilizado) > 0">
+            <div ng-if="(venda.valorTotal - venda.valorDesconto - (venda.valorPago || 0)  - venda.creditoCliente - venda.creditoUtilizado - venda.valorFoiPago) > 0">
               Resta pagar             
-              <strong>{{valorTotalVenda - venda.valorDesconto - venda.valorPago - venda.creditoCliente - venda.creditoUtilizado | currency}} </strong>
+              <strong>{{venda.valorTotal - venda.valorDesconto - (venda.valorPago || 0) - venda.creditoCliente - venda.creditoUtilizado - venda.valorFoiPago | currency}} </strong>
             </div>
-            
-            <div ng-if="((valorTotalVenda - venda.valorDesconto - venda.valorPago - venda.creditoCliente  - venda.creditoUtilizado) < 0 ) && venda.valorPago > 0">
+            <!--{{ venda.valorTotal}}
+            {{venda.valorDesconto}}
+            {{venda.valorPago}}
+            {{venda.creditoCliente}}
+            {{venda.creditoUtilizado}}
+            {{venda.valorFoiPago}}-->
+            <div ng-if="(venda.valorTotal - venda.valorDesconto - (venda.valorPago || 0) - venda.creditoCliente  - venda.creditoUtilizado - venda.valorFoiPago) < 0">
               Cliente receberá crédito no valor de: 
-              <strong>{{((valorTotalVenda - venda.valorDesconto - venda.valorPago - venda.creditoCliente  - venda.creditoUtilizado) * -1 | currency}} </strong>
+              <strong>{{(venda.valorTotal - venda.valorDesconto - (venda.valorPago || 0) - venda.creditoCliente  - venda.creditoUtilizado - venda.valorFoiPago) * -1 | currency}} </strong>
             </div>
 
             
