@@ -256,7 +256,7 @@
   .controller('AppCtrl', function($scope,$http,$mdDialog,$timeout, $mdSidenav, $log,$mdMedia, $rootScope,PropriedadesCompartilhadas) {
     $scope.formVenda = {};      
     $scope.toggleLeft = buildDelayedToggler('left');      
-
+    $scope.produtosComprados = "";//apenas para envio de mensagem para o whatsapp
     $scope.venda = {produto: {},valorTotal: 0, valorPago: 0, creditoUtilizado: 0, creditoCliente:0, valorBonus:0, cliente: 0, valorFoiPago: 0};
     $scope.produtosVenda = [];
     PropriedadesCompartilhadas.setClientes();
