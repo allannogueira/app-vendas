@@ -117,14 +117,18 @@
                       Apenas reservar os produtos
                     </md-switch>
                     <div ng-show="venda.reserva">(os produtos ser&atilde;o reservados)</div>
-                  </div>
-                  <div flex ng-if="venda.id">
+                  </div>                 
+                </div>
+
+                <div layout="row">
+                 <div flex ng-if="venda.id">
                     <md-switch ng-model="venda.cancelada" aria-label="Switch 1" ng-change="(!venda.cancelada) ? (venda.cancelada = true) : cancelarVenda($event)">
                       Venda Cancelada
                     </md-switch>                      
                     <div ng-show="venda.cancelada">(os produtos dessa venda voltaram para o estoque assim como os creditos voltaram para o cliente caso tenha deixado algum produto pago.)</div>                    
                   </div>
                 </div>
+
               </md-card-content>
             </md-card>
             <!-- Colored raised button -->            
