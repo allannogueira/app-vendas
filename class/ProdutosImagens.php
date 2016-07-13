@@ -64,7 +64,7 @@ class ProdutosImagens{
                     ,'".$this->getProduto()."'
                 )
         ";      
-        
+        //echo $sql;
         $result = mysqli_query($conexao,$sql);
     }
 

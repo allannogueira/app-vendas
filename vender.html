@@ -89,7 +89,7 @@
                       <md-select  name="produto" placeholder="Produto" ng-model="venda.produto" ng-required="true" md-on-open="carregarProdutos()">
                         <md-option ng-value="$index" ng-repeat="produto in produtos track by $index">                          
                           <div ng-show="produto.estoque > 0">
-                            <img style="max-height: 20px;" src="{{produto.imagem}}" /> {{produto.nome}} - {{produto.tamanho}} - {{produto.precoVenda | currency}}
+                            <img style="max-height: 20px;" src="{{'img/produtos/'+produto.imagem}}" /> {{produto.nome}} - {{produto.tamanho}} - {{produto.precoVenda | currency}}
                           </div>
                           <div ng-show="produto.estoque == 0">
                             Acabou o estoque de {{produto.nome}}
@@ -131,7 +131,7 @@
 
             <md-list class="md-dense" flex="" ng-show="produtosVenda != ''">             
               <md-list-item class="md-3-line" ng-repeat="item in produtosVenda track by $index" ng-click="(!venda.id) ? remove($event,produtosVenda,$index) : '' ">
-                <img ng-src="{{item.imagem}}" class="md-avatar" alt="{{item.nome}}" />
+                <img ng-src="{{'img/produtos/'+item.imagem}}" class="md-avatar" alt="{{item.nome}}" />
                 <div class="md-list-item-text" layout="column" flex="33">
                   <h3>{{item.qtd}}x - {{ item.nome }} - {{item.cod}}</h3>
                   <h4>{{ item.tamanho }}</h4>
@@ -566,7 +566,7 @@
         angular.forEach(scope2.produtosVenda,function(item){
           
           //verifico se ja existe o produto com mesmo tamanho e codigo
-          scope2.produtosComprados = item.nome + ' - cod:' + item.cod + ' - qtd:' + item.qtd + '%0A';
+          scope2.produtosComprados += item.nome + ' - cod:' + item.cod + ' - qtd:' + item.qtd + '%0A';
           
         });     
 

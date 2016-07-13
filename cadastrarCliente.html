@@ -24,8 +24,7 @@
           <span>APP VENDAS</span>
         </h2>
         <span flex></span>
-        <md-button ng-click="cliente = {}" class="md-primary md-raised">Cadastrar Novo</md-button>
-        <md-button ng-click="carregarCliente($event)" class="md-primary md-raised">Carregar Cliente</md-button>
+        
       </div>
     </md-toolbar>
     <section layout="row" flex> 
@@ -44,6 +43,8 @@
       </div>
 
       <md-content flex layout-padding>
+       <md-button ng-click="cliente = {}" class="md-primary md-raised">Cadastrar Novo</md-button>
+        <md-button ng-click="carregarCliente($event)" class="md-primary md-raised">Carregar Cliente</md-button>
 
         <h1>Cadastrar Cliente</h1>               
         <form ng-submit="salvarCliente($event)" name="formCliente" novalidate>

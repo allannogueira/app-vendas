@@ -38,7 +38,7 @@
           <span>APP VENDAS</span>
         </h2>
         <span flex></span>        
-        <a href='whatsapp://send?text=teste%0Ateste'><i class="material-icons">share</i></a>
+        <a href='whatsapp://send?text=http://192.185.176.178/~ddc/app-venda/consultarCatalogo.html'><i class="material-icons">share</i></a>
 
       </div>
     </md-toolbar>
@@ -76,7 +76,7 @@
             </p>
             <div class="galleria">
             
-              <img ng-repeat="x in produtos track by $index" style="display:inline-block" ng-if="produto.cod == x.cod" width="150" src={{x.imagem}} />
+              <img ng-repeat="x in produtos track by $index" style="display:inline-block" ng-if="produto.cod == x.cod" width="150" src={{'img/produtos/'+x.imagem}} />
             
             </div>
           </div>
@@ -134,25 +134,14 @@
           );
       }
 
-      $scope.$watch('files.length',function(newVal,oldVal){
-        console.log($scope.files);
-      });
       
       $scope.consultarProduto = function($event) {
         //var codProduto = "";
         $scope.aux = 0;
         $scope.produtos = [];
-        //carrega as imagens em um FormData()
-        /*var formData = new FormData();
-         angular.forEach($scope.files,function(obj){
-          console.log($scope.files);
-          formData.append('files[]', obj.lfFile);
-        });
-        */
-        $http.post("controller/consultarProduto.php",{id: -1}).then(function(response)  {
-         console.log(response.data);
-         $scope.produtos = response.data;
-           //$scope.srcimg = response.data;
+    
+        $http.post("controller/consultarProduto.php",{id: -1}).then(function(response)  {         
+         $scope.produtos = response.data;           
          });
       }
       $scope.consultarProduto(); 

@@ -1,6 +1,9 @@
 <html lang="en" >
 <head>
+  <meta http-equiv="Content-Type" content="text/html" charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="resource-type" content="document" />
   <!-- Angular Material style sheet -->
   <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
   <link rel="stylesheet" href="css/lf-ng-md-file-input.css">  
@@ -25,12 +28,12 @@
           <span>APP VENDAS</span>
         </h2>
         <span flex></span>
-        <md-button ng-click="produto = {}" class="md-primary md-raised">Cadastrar Novo</md-button>
-        <md-button ng-click="carregarProduto($event)" class="md-primary md-raised">Carregar Produto</md-button>
+        
       </div>
     </md-toolbar>    
     <section layout="row" flex> 
       <div layout="column"  ng-cloak>
+
         <section layout="row" flex>
           <md-sidenav class="md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" md-disable-backdrop md-whiteframe="4" style="top: 57px">
             <md-toolbar class="md-theme-indigo">
@@ -44,7 +47,9 @@
         </section>
       </div>
 
-      <md-content flex layout-padding>                
+      <md-content flex layout-padding>  
+      <md-button ng-click="produto = {}" class="md-primary md-raised">Cadastrar Novo</md-button>
+        <md-button ng-click="carregarProduto($event)" class="md-primary md-raised">Carregar Produto</md-button>              
         <form name="formProduto" ng-submit="salvarProduto($event)" novalidate>
           <input name="id" type="hidden" ng-model="produto.id"/>
           <md-input-container class="md-block" flex-gt-sm="">
@@ -91,7 +96,7 @@
           <lf-ng-md-file-input name="files" lf-files="files" lf-on-file-click="onFileClick" preview drag multiple></lf-ng-md-file-input>
           <br/>
           <!-- Colored raised button -->
-          <md-button type="submit" class="md-primary md-raised" >
+          <md-button ng-hide="hideSalvar" type="submit" class="md-primary md-raised" >
             Salvar
           </md-button>
         </form>
@@ -111,7 +116,7 @@
   <script src="js/angular-locale_pt-br.js"></script>  
   <script src="http://aguirrel.github.io/ng-currency/dist/ng-currency.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-  <script src="js/ngProgress.min.js"></script>
+  <script src="js/ngprogress.min.js"></script>
   <script type="text/javascript">
     angular.module('myApp', ['ngMaterial','ngProgress','lfNgMdFileInput','ng-currency'])
     .config(function($mdThemingProvider) {
@@ -141,10 +146,6 @@
           .targetEvent(ev)
           );
       }
-
-      $scope.$watch('files.length',function(newVal,oldVal){
-        console.log($scope.files);
-      });
 
       $scope.copiaPrecoCusto = function(){
         $scope.produto.precoVenda = $scope.produto.precoVenda || angular.copy($scope.produto.precoCusto);        
@@ -186,15 +187,14 @@
       
 
       $scope.salvarProduto = function($event) {
-        
+        $scope.hideSalvar = true;
+        $scope.showAlert($event,"Aguarde...");
         if($scope.formProduto.$valid){
            $scope.progressbar.start();
-          var codProduto = "";
 
           //carrega as imagens em um FormData()
           var formData = new FormData();
-          angular.forEach($scope.files,function(obj){
-            console.log($scope.files);
+          angular.forEach($scope.files,function(obj){            
             formData.append('files[]', obj.lfFile);
           });
 
@@ -208,14 +208,16 @@
           }).then(function mySucces(response) {  
 
             if(response.data){
-              $scope.showAlert($event,"Salvo com sucesso!");
-              codProduto = response.data;
+              
+              $scope.produto.id = $scope.produto.id || response.data;
               //envia as imagens para o cadastro de produtos
-              $http.post("controller/cadastrarProduto.php?codProduto="+codProduto, formData, {
+              $http.post("controller/cadastrarProduto.php?idProduto="+$scope.produto.id, formData, {                
                 transformRequest: angular.identity,
                 headers: {'Content-Type': undefined}
               })
               .success(function(){
+                $scope.showAlert($event,"Salvo com sucesso!");
+                $scope.hideSalvar = false;  
               })
               .error(function(){
               });
@@ -224,10 +226,10 @@
               $scope.showAlert($event,response.data);
             } 
 
-             $scope.progressbar.complete();         
+             $scope.progressbar.complete();       
+             
           }, 
-          function myError(response) {
-            console.log(response.statusText);
+          function myError(response) {            
              $scope.progressbar.complete();
           });
         }else{
@@ -271,7 +273,7 @@
       //quando montado o dialog
       function DialogController($scope, $mdDialog, $rootScope, $http,scope2,$mdDialog) {
         //carrega todos os clientes
-        $http.post("controller/consultarProduto.php",{id: -1}).then(function(response)  {           
+        $http.post("controller/consultarProduto.php",{id: ''}).then(function(response)  {           
           $scope.produtos = response.data;     
            scope2.progressbar.complete();      
         });
@@ -288,11 +290,13 @@
             //$scope.clientes = response.data;           
             scope2.produto = response.data[0];
 
+            $(".imagens").remove();
+
             $(".lf-ng-md-file-input-preview-container").append("<div class='imagens' style='width: 100%; position: relative;'></div>");
             angular.forEach(response.data,function(obj){ 
 
               if(obj.idImagem != null){
-                $(".lf-ng-md-file-input-preview-container .imagens").append("<img id='img"+obj.idImagem+"'  onclick=\"excluirImagem('"+obj.idImagem+"')\" style='display: inline-block; float: left; margin: 10px; box-shadow: 5px 5px 5px #CCC' height='160' width='160' src='"+obj.imagem+"' /> ");
+                $(".lf-ng-md-file-input-preview-container .imagens").append("<img id='img"+obj.idImagem+"'  onclick=\"excluirImagem('"+obj.idImagem+"')\" style='display: inline-block; float: left; margin: 10px; box-shadow: 5px 5px 5px #CCC' height='160' width='160' src='img/produtos/"+obj.imagem+"' /> ");
                 }
             });
                scope2.progressbar.complete();

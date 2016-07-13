@@ -10,6 +10,7 @@ class Produto{
     private $promocao;
     private $tamanho;
     private $reserva;
+    private $thumbnail;
     
     /**
      * Gets the value of id.
@@ -228,6 +229,25 @@ class Produto{
         return $this;
     }
 
+     public function getThumbnail()
+    {
+        return $this->thumbnail;
+    }
+
+    /**
+     * Sets the value of reserva.
+     *
+     * @param mixed $reserva the reserva
+     *
+     * @return self
+     */
+    public function setThumbnail($thumbnail)
+    {
+        $this->thumbnail = $thumbnail;
+
+        return $this;
+    }
+
 
     public function salvar($conexao){
         
@@ -240,6 +260,7 @@ class Produto{
             ,estoque       
             ,promocao
             ,tamanho
+            ,thumbnail
             )
             VALUES(
             '".$this->cod."'
@@ -249,6 +270,7 @@ class Produto{
             ,'".$this->estoque."'
             ,'".$this->promocao."'
             ,'".$this->tamanho."'            
+            ,'".$this->thumbnail."'            
             )
             ";      
             $result = mysqli_query($conexao,$sql);
@@ -266,20 +288,16 @@ class Produto{
     }
 
     public function atualizar($conexao){
-        $sql = "UPDATE ddc_app_vendas.produto 
-        SET
-        cod =  '".$this->cod."'
-        ,nome = '".$this->nome."'
-        ,preco_custo = '".$this->precoCusto."'
-        ,preco_venda = '".$this->precoVenda."'
-        ,estoque = '".$this->estoque."'  
-        ,promocao = '".$this->promocao."'
-        ,tamanho = '".$this->tamanho."'        
-        WHERE
-            id = '".$this->id."'
-        ";      
-        //return $sql;
-        return mysqli_query($conexao,$sql);
+        mysqli_query($conexao,"UPDATE ddc_app_vendas.produto SET cod =  '".$this->cod."' WHERE id = '".$this->id."' and '".$this->cod."' <> '' ");
+        mysqli_query($conexao,"UPDATE ddc_app_vendas.produto SET nome =  '".$this->nome."' WHERE id = '".$this->id."' and '".$this->nome."' <> '' ");
+        mysqli_query($conexao,"UPDATE ddc_app_vendas.produto SET preco_custo =  '".$this->precoCusto."' WHERE id = '".$this->id."' and '".$this->precoCusto."' <> '' ");
+        mysqli_query($conexao,"UPDATE ddc_app_vendas.produto SET preco_venda =  '".$this->precoVenda."' WHERE id = '".$this->id."' and '".$this->precoVenda."' <> '' ");
+        mysqli_query($conexao,"UPDATE ddc_app_vendas.produto SET estoque =  '".$this->estoque."' WHERE id = '".$this->id."' and '".$this->estoque."' <> '' ");
+        mysqli_query($conexao,"UPDATE ddc_app_vendas.produto SET promocao =  '".$this->promocao."' WHERE id = '".$this->id."' and '".$this->promocao."' <> '' ");
+        mysqli_query($conexao,"UPDATE ddc_app_vendas.produto SET tamanho =  '".$this->tamanho."' WHERE id = '".$this->id."' and '".$this->tamanho."' <> '' ");
+        mysqli_query($conexao,"UPDATE ddc_app_vendas.produto SET thumbnail =  '".$this->thumbnail."' WHERE id = '".$this->id."' and '".$this->thumbnail."' <> '' ");
+        
+        
     }
 
     public function listar($conexao){

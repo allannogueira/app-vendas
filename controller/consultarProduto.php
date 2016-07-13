@@ -37,7 +37,7 @@ if($id == '-1'){//busca todos com todas as imagens
     $sql = "SELECT 
     P.*,
     0 as idImagem,
-    (select imagem from ddc_app_vendas.produto_imagens PI where PI.produto_id = P.id LIMIT 1) as imagem 
+    thumbnail as imagem 
     FROM ddc_app_vendas.produto P
     where
     (
@@ -47,10 +47,10 @@ if($id == '-1'){//busca todos com todas as imagens
         AND '".$id."' = ''
       )
         OR id = '".$id."'
-    )
-    AND P.estoque > 0
+    )    
 
     ";
+  //  echo $sql;
 }else{
     //busca 1 produto apenas, com todas as imagens
    $sql = "SELECT 
